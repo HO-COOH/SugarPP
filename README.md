@@ -36,7 +36,9 @@ when (x) {
 This project tries to mock kotlin's ``when`` in C++. It may sounds stupid, but it shows how powerful ``template`` can be, yet I only used a small portition of its power.
 ## Usage
 Just include the ``When.hpp`` header in your project.
-
+## Requirement
+Any compiler that supports C++14.
+I also implemented the same functionality using C++20 concepts because it's cool :)
 ## Example
 Example is included in ``main.cpp``. Here I copied them without the comments for a brief intuition.
 ```cpp
