@@ -172,7 +172,7 @@ auto when(auto expr, is_not<is_not_type>, auto return1, auto case2, auto... args
 }
 
 #else
-/*****************************Pre C++20 template implementation ***************************************/
+/*****************************C++17 template implementation ***************************************/
 
 /**
  * @brief The comparable "concept" struct for determining whether two type can be compared using "=="

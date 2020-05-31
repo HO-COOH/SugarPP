@@ -37,7 +37,8 @@ This project tries to mock kotlin's ``when`` in C++. It may sounds stupid, but i
 ## Usage
 Just include the ``When.hpp`` header in your project.
 ## Requirement
-Any compiler that supports C++14.
+Any compiler that supports C++17, because if would be so hard to do without ``constexpr if`` (*I may consider adding support for pre C++17 if I am more advanced*)
+
 I also implemented the same functionality using C++20 concepts because it's cool :)
 ## Example
 Example is included in ``main.cpp``. Here I copied them without the comments for a brief intuition.
