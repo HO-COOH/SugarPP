@@ -82,5 +82,24 @@ int main()
     std::cout << describe(1000l) << '\n';               //"long"
     std::cout << describe(2) << '\n';                   //"Not a string"
     std::cout << describe("random string"s) << '\n';    //"Unknown string"
+
+    /*C string is also supported*/
+    auto describe2 = [](auto&& obj) {
+        return when((obj),
+            1,                              "One",
+            "hello",                        "Greeting",
+            is<long>{},                     "long",
+            is_not<const char*>{},          "Not a string",
+            Else(),                         "Unknown string");
+    };
+    puts(describe2(1));                 //"One"
+    puts(describe2("hello"));           //"Greeting"
+    puts(describe2(1000l));             //"long"
+    puts(describe2(2));                 //"Not a string"
+    puts(describe2("random string"));   //"Unknown string"
 }
 ```
+
+## To-DO
+- Support for direct contrary operation (for example, ``!is<long>`` instead of ``is_not<long>``).
+- Better lambda support in matching branches
