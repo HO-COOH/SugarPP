@@ -1,5 +1,6 @@
 #include <type_traits>
 #include <utility>
+#include <cstring>  //for strcmp()
 
 /*For range matching */
 template <typename T, typename T2 = int, typename T3 = typename std::conditional<std::is_integral<T>::value&& std::is_floating_point<T2>::value, double, int>::type>
@@ -93,6 +94,7 @@ auto when(auto&& expr, auto&& to_match, auto&& ReturnResult)
     }
     return ReturnType{};
 }
+
 /**
  * @brief The final Else case
  *
@@ -110,7 +112,6 @@ auto when(auto&&, Else, auto&& ReturnResult)
  * @tparam is_type: the type query for whether [expr] has the same type
  * @param expr: the expression to match
  * @param ReturnResult: the return expression if [expr] has the same type as [is_type]
- * @return []
  */
 template <typename is_type>
 auto when(auto&& expr, is<is_type>, auto&& ReturnResult)
@@ -123,6 +124,16 @@ template <typename is_not_type>
 auto when(auto&& expr, is_not<is_not_type>, auto&& ReturnResult)
 {
     if constexpr (!std::is_same_v<decltype(expr), typename is_not<is_not_type>::type>)
+        return ReturnResult;
+    return decltype(ReturnResult){};
+}
+
+/**
+ * @brief Special case for handling C string
+*/
+auto when(const char* expr, const char* to_match, auto&& ReturnResult)
+{
+    if (strcmp(expr) == strcmp(to_match))
         return ReturnResult;
     return decltype(ReturnResult){};
 }
@@ -153,18 +164,31 @@ auto when(auto&& expr, auto&& case1, auto&& return1, auto&& case2, auto&&... arg
     The object won't get moved nor copied.
 */
 
+
+/**
+ * @brief Special case for handling C string
+*/
+auto when(const char* expr, const char* case1, auto&& return1, auto&& case2, auto&&... args)
+{
+    if (strcmp(expr) == strcmp(case1))
+        return std::move(return1);
+    else
+        return when(expr, case2, args...);
+}
+
+
 /**
  * @brief Special case for handling is<> and is_not<> type query
 */
 template <typename is_type>
-auto when(auto expr, is<is_type>, auto return1, auto case2, auto... args)
+auto when(auto&& expr, is<is_type>, auto&& return1, auto&& case2, auto&&... args)
 {
     if constexpr (std::is_same_v<decltype(expr), typename is<is_type>::type>)
         return return1;
     return when(expr, case2, args...);
 }
 template <typename is_not_type>
-auto when(auto expr, is_not<is_not_type>, auto return1, auto case2, auto... args)
+auto when(auto&& expr, is_not<is_not_type>, auto&& return1, auto&& case2, auto&&... args)
 {
     if constexpr (!std::is_same_v<decltype(expr), typename is_not<is_not_type>::type>)
         return return1;
@@ -239,6 +263,17 @@ auto when(ExprType&&, is_not<is_not_type>, ReturnType&& ReturnResult)
 }
 
 /**
+ * @brief Special case for handling C string
+*/
+template <typename ReturnType>
+auto when(const char* Expr, const char* Case, ReturnType&& ReturnResult)
+{
+    if (strcmp(Expr, Case) == 0)
+        return std::move(ReturnResult);
+    return std::remove_reference_t<ReturnType>{};
+}
+
+/**
  * @brief The special case for handling <Else> expression
  *
  * @param ExprType&&: place holder for non-used [expression]
@@ -270,6 +305,18 @@ auto when(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&&
             return when(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
     }
     return when(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
+}
+
+/**
+ * @brief Special case for handling C string
+*/
+template <typename Return1Type, typename Case2Type, typename... Args>
+auto when(const char* Expr, const char* Case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
+{
+    if (strcmp(Expr, Case1)==0)
+        return std::move(return1);
+    else
+        return when(Expr, std::forward<Case2Type>(case2), std::forward<Args>(args)...);
 }
 
 /**
