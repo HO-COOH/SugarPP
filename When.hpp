@@ -1,6 +1,8 @@
+#pragma once
 #include <type_traits>
 #include <utility>
 #include <cstring>  //for strcmp()
+#include "GroupedCondition.hpp"
 
 /*For range matching */
 template <typename T, typename T2 = int, typename T3 = typename std::conditional<std::is_integral<T>::value&& std::is_floating_point<T2>::value, double, int>::type>
@@ -32,10 +34,16 @@ public:
     auto end() { return RangeIterator(&end_v, step); }
     
     /*Added from my [HavingFun] repo to support range matching*/
-    template <typename Num>
+    template <typename Num, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
     friend bool operator==(Num number, Range const& rhs)
     {
         return number >= rhs.start && number <= rhs.end_v ? true : false;
+    }
+
+    template<typename Num,typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
+    bool operator==(Num number) const
+    {
+        return number == (*this);
     }
 };
 
@@ -151,7 +159,7 @@ auto when(auto&& expr, auto&& case1, auto&& return1, auto&& case2, auto&&... arg
     }
     if constexpr (comparable<decltype(expr), decltype(case1)>)
     {
-        if (expr == case1)
+        if (case1 == expr)
             return std::move(return1);
         else
             return when(expr, case2, args...);
@@ -201,16 +209,16 @@ auto when(auto&& expr, is_not<is_not_type>, auto&& return1, auto&& case2, auto&&
 /**
  * @brief The comparable "concept" struct for determining whether two type can be compared using "=="
 */
-template <typename lhsType, typename rhsType, typename = void>
-struct comparable : std::false_type
-{
-};
-
-template <typename lhsType, typename rhsType>
-struct comparable<lhsType, rhsType, decltype((std::declval<lhsType>() == std::declval<rhsType>()), void())>
-    : std::true_type
-{
-};
+//template <typename lhsType, typename rhsType, typename = void>
+//struct comparable : std::false_type
+//{
+//};
+//
+//template <typename lhsType, typename rhsType>
+//struct comparable<lhsType, rhsType, decltype((std::declval<lhsType>() == std::declval<rhsType>()), void())>
+//    : std::true_type
+//{
+//};
 
 
 
@@ -299,7 +307,7 @@ auto when(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&&
     }
     if constexpr (comparable<ExprType, Case1Type>::value)
     {
-        if (expr == case1)
+        if (case1 == expr)
             return std::move(return1);
         else
             return when(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);

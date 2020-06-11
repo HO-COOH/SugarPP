@@ -4,6 +4,7 @@
 #include <functional>
 #include <climits> //for INT_MAX
 
+
 using namespace std::literals;
 int main()
 {
@@ -36,14 +37,14 @@ int main()
     // };
 
     auto describe = [](auto &&obj) {
-        return when((obj),
-                    1,                      "One"s,
-                    "hello"s,               "Greeting"s,
-                    is<long>{},             "long"s,
-                    is_not<std::string>{},  "Not a string"s,
-                    Else(),                 "Unknown string"s);
+        return when((obj),    
+                    OR{ 1,2 },                  "One or two"s,
+                    "hello"s,                   "Greeting"s,
+                    is<long>{},                 "long"s,
+                    NOT{is<std::string>{} },    "Not a string"s,
+                    Else(),                     "Unknown string"s);
     };
-    std::cout << describe(1) << '\n';                   //"One"
+    std::cout << describe(1) << '\n';                   //"One or two"
     std::cout << describe("hello"s) << '\n';            //"Greeting"
     std::cout << describe(1000l) << '\n';               //"long"
     std::cout << describe(2) << '\n';                   //"Not a string"
@@ -62,4 +63,5 @@ int main()
     puts(describe2(1000l));             //"long"
     puts(describe2(2));                 //"Not a string"
     puts(describe2("random string"));   //"Unknown string"
+
 }
