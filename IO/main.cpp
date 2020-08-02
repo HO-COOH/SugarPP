@@ -1,4 +1,5 @@
 #include "IO.hpp"
+#include "print.hpp"
 void printSeparator()
 {
     std::cout << "----------------------------------";
@@ -27,4 +28,7 @@ int main()
     test<std::string>();
     test<long long>();
     test<unsigned long long>();
+
+
+    print("hello", "world");
 }

@@ -62,6 +62,7 @@ I also implemented the same functionality using C++20 concepts because it's cool
 Example is included in ``main.cpp``. Here I copied them without the comments for a briefintuition.
 ```cpp
 #include "When.hpp"
+#include "../IO/IO.hpp" //for print()
 #include <iostream>
 #include <string>
 #include <functional>
@@ -75,7 +76,7 @@ int main()
         Else(),     std::function{ [] {puts("x is neither 1 nor 2"); } }
     )();//"x==1"
     int temperature = 10;
-    puts(when((temperature),
+    print(when((temperature),
               Range(INT_MIN, 0),    "freezing",
               Range(1, 15),         "cold",
               Range(16, 20),        "cool",
@@ -88,29 +89,29 @@ int main()
         return when((obj),
                     1,                      "One"s,
                     "hello"s,               "Greeting"s,
-                    is<long>{},             "long"s,
-                    is_not<std::string>{},  "Not a string"s,
+                    is<long>(),             "long"s,
+                    is_not<std::string>(),  "Not a string"s,
                     Else(),                 "Unknown string"s);
     };
-    std::cout << describe(1) << '\n';                   //"One"
-    std::cout << describe("hello"s) << '\n';            //"Greeting"
-    std::cout << describe(1000l) << '\n';               //"long"
-    std::cout << describe(2) << '\n';                   //"Not a string"
-    std::cout << describe("random string"s) << '\n';    //"Unknown string"
+    print(describe(1));                   //"One"
+    print(describe("hello"s));            //"Greeting"
+    print(describe(1000l));               //"long"
+    print(describe(2));                   //"Not a string"
+    print(describe("random string"s));    //"Unknown string"
     /*C string is also supported*/
     auto describe2 = [](auto&& obj) {
         return when((obj),
             1,                              "One",
             "hello",                        "Greeting",
-            is<long>{},                     "long",
-            is_not<const char*>{},          "Not a string",
+            is<long>(),                     "long",
+            is_not<const char*>(),          "Not a string",
             Else(),                         "Unknown string");
     };
-    puts(describe2(1));                 //"One"
-    puts(describe2("hello"));           //"Greeting"
-    puts(describe2(1000l));             //"long"
-    puts(describe2(2));                 //"Not a string"
-    puts(describe2("random string"));   //"Unknown string"
+    print(describe2(1));                 //"One"
+    print(describe2("hello"));           //"Greeting"
+    print(describe2(1000l));             //"long"
+    print(describe2(2));                 //"Not a string"
+    print(describe2("random string"));   //"Unknown string"
 }
 ```
 ### Advanced Usage
@@ -120,31 +121,35 @@ An example (also included in ``main.cpp``):
 ```cpp
     auto describe = [](auto &&obj) {
         return when((obj),    
-                    OR{ 1,2 },                  "One or two"s,
+                    OR(1,2),                  "One or two"s,
                     "hello"s,                   "Greeting"s,
-                    is<long>{},                 "long"s,
-                    NOT{is<std::string>{} },    "Not a string"s,
+                    is<long>(),                 "long"s,
+                    NOT(is<std::string>()),    "Not a string"s,
                     Else(),                     "Unknown string"s);
     };
-    std::cout << describe(1) << '\n';                   //"One or two"
-    std::cout << describe("hello"s) << '\n';            //"Greeting"
-    std::cout << describe(1000l) << '\n';               //"long"
-    std::cout << describe(2) << '\n';                   //"Not a string"
-    std::cout << describe("random string"s) << '\n';    //"Unknown string"
+    print(describe(1));                   //"One or two"
+    print(describe("hello"s));            //"Greeting"
+    print(describe(1000l));               //"long"
+    print(describe(2));                   //"Not a string"
+    print(describe("random string"s));    //"Unknown string"
 ```
 ### To-DO
 - ~~Support for direct contrary operation (for example, ``!is<long>`` instead of``is_not<long>``).~~ √
 - Better lambda support in matching branches
 
 ## IO
-A convenient helper function for substitute ``std::cin`` that just **works as you intended.** No more ``getchar()`` for *eating* the enter key nonsense!
+A convenient helper function for substitute ``std::cin`` that just **works as you intended.** No more ``getchar()`` for *eating* the enter key nonsense! Let ``print() / printLn()`` helps to eliminate ugly ``::`` and ``<<``
 ### Introduction
 The ``input`` template function is similar to ``python``. It prints a ``prompt`` message and does the following things with error handling, which means clearing any bad bit and ignores the rest of the input and can be specify to ``retry`` until the user entered the right thing. (**default is retry enabled**)
 - If the type is a primitive, it works the same as ``std::cin >>``
     + If the type is ``unsigned`` number type, and it receives a negative number, it converts to the absolute value
 - If the type is ``std::string``, it works the same as ``std::getline``
+
+The ``print()`` function template prints **ANY** number of arguments, separated by a template argument ``delim`` (default to a space).
+
+The ``printLn()`` function template prints **ANY** number of arguments, one line at a time.
 ### Usage
-Just include `./IO/IO.hpp`
+Just include `./IO/IO.hpp`.
 ### Example
 A more detailed example is in ``./IO/main.cpp``
 ```cpp
@@ -154,6 +159,8 @@ int main()
     auto date = input<int>("Today's data: ");
     auto day = input<std::string>("What day is today? ");
     auto someChar = input<char>("Enter a character: ", false);  //retry disabled
+
+    print("Today is", date, ", ", day);
 }
 ```
 
@@ -177,38 +184,40 @@ My ``Range`` class template suppors:
 My ``Enumerate`` class template is also used in range-based for loop. And returns a ``std::pair`` of ``index`` and an ``iterator`` from an ``iterable`` of the constructed ``Enumerate`` class. And it's better to be used together with structured-binding (C++17), eg: ``for(auto [i, v] : Enumerate(someArray))``
 ### Example
 ```cpp
-/*use Range in range-based for loop*/
-for (auto i : Range(0, 10))
-    std::cout << i << '\n';
+#include "../IO/IO.hpp" //for print()
+#include "Range.hpp"
+#include "Enumerate.hpp"
+int main()
+{
+    /*use Range in range-based for loop*/
+    for (auto i : Range(0, 10))
+        print(i);
 
-/*use range for a random number*/
-Range r(-1, 100000);
-std::cout << "Random number in " << r << " is " << r.rand() << '\n';
+    /*use range for a random number*/
+    Range r(-1, 100000);
+    print("Random number in ", r, " is ", r.rand());
 
-/*use range to fill a C style array*/
-double arr[10];
-Range(-500.0, 500.0).fillRand(arr);
-std::copy(std::cbegin(arr), std::cend(arr), std::ostream_iterator<double>{std::cout, "\n"});
+    /*use range to fill a C style array*/
+    double arr[10];
+    Range(-500.0, 500.0).fillRand(arr);
 
-/*use range to fill a STL container*/
-std::array<char, 20> arr2;
-Range('A', 'z').fillRand(arr2);
-std::copy(std::cbegin(arr), std::cend(arr), std::ostream_iterator<char>{std::cout});
-std::cout << '\n';
+    /*use range to fill a STL container*/
+    std::array<char, 20> arr2;
+    Range('A', 'z').fillRand(arr2);
 
-/*Alternatively .randFast() provides a faster way for generating random number using rand() in C*/
-int arr3[10];
-Range(-200, 300).fillRandFast(arr3);
-std::copy(std::cbegin(arr3), std::cend(arr3), std::ostream_iterator<int>{std::cout, "\n"});
+    /*Alternatively .randFast() provides a faster way for generating random number using rand() in C*/
+    int arr3[10];
+    Range(-200, 300).fillRandFast(arr3);
 
-std::array arr{ "cpp", "sugar", "sweet" };
-for(auto [index, string]:Enumerate(arr))
-    std::cout << index << '\t' << string << '\n';
-/*
-    0       cpp
-    1       sugar
-    2       sweet
-*/
+    std::array arr{ "cpp", "sugar", "sweet" };
+    for(auto [index, string]:Enumerate(arr))
+        print<'\t'>(index, string);
+    /*
+        0       cpp
+        1       sugar
+        2       sweet
+    */
+}
 ```
 ### Usage
 Just include `./Range/Range.hpp` for ``Range`` and ``./Enumerate/Enumerate.hpp`` for ``Enumerate``

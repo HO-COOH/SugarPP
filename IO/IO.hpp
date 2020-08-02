@@ -88,3 +88,23 @@ T input(std::string_view prompt, bool retry = true)
     return input<T>(prompt.data(), retry);
 }
 #endif
+
+#if __cplusplus > 201703L
+void printLn(auto &&... args)
+{
+    ((std::cout << args << '\n'), ...);
+}
+#endif
+
+template <char delim = ' ', std::ostream& os = std::cout, typename... Args>
+void print(Args &&... args)
+{
+    ((os << args << delim), ...);
+    os << '\n';
+}
+
+template <std::ostream& os = std::cout, typename... Args>
+void printLn(Args &&... args)
+{
+    ((os << args << '\n'), ...);
+}
