@@ -165,11 +165,16 @@ In tons of other programming languages, there are the similar syntax as follows:
 ```
 for(var i in [0..10])
 {...}
+
+for i, v in enumerate(someArray):
+    # python syntax
 ```
 My ``Range`` class template suppors:
 - With sepecified ``start``, ``end`` and ``step (default = 1)``, which can be used in C++ range-based for loop. Type will be inferred (with C++17), and if there is discrepancy, will be converted to the right type
 - Generate random number in the range
 - Fill a container with random number
+
+My ``Enumerate`` class template is also used in range-based for loop. And returns a ``std::pair`` of ``index`` and an ``iterator`` from an ``iterable`` of the constructed ``Enumerate`` class. And it's better to be used together with structured-binding (C++17), eg: ``for(auto [i, v] : Enumerate(someArray))``
 ### Example
 ```cpp
 /*use Range in range-based for loop*/
@@ -195,6 +200,15 @@ std::cout << '\n';
 int arr3[10];
 Range(-200, 300).fillRandFast(arr3);
 std::copy(std::cbegin(arr3), std::cend(arr3), std::ostream_iterator<int>{std::cout, "\n"});
+
+std::array arr{ "cpp", "sugar", "sweet" };
+for(auto [index, string]:Enumerate(arr))
+    std::cout << index << '\t' << string << '\n';
+/*
+    0       cpp
+    1       sugar
+    2       sweet
+*/
 ```
 ### Usage
-Just include `./Range/Range.hpp`
+Just include `./Range/Range.hpp` for ``Range`` and ``./Enumerate/Enumerate.hpp`` for ``Enumerate``
