@@ -2,7 +2,88 @@
 #include <type_traits>
 #include <utility>
 #include <cstring>  //for strcmp()
-#include "GroupedCondition.hpp"
+#include <utility>
+
+template <typename lhsType, typename rhsType, typename = void>
+struct comparable : std::false_type
+{
+};
+
+template <typename lhsType, typename rhsType>
+struct comparable<lhsType, rhsType, decltype((std::declval<lhsType>() == std::declval<rhsType>()), void())>
+    : std::true_type
+{
+};
+
+/*Dummy structs representing logical relation used by [GroupedExpression]*/
+class Operator {
+public:
+};
+/**
+ * @brief A dummy struct for logic NOT
+*/
+template<typename Case>
+class NOT : public Operator
+{
+    Case caseExpr;
+public:
+    NOT(Case&& expr) :caseExpr(std::move(expr)) {}
+
+    template<typename Expr, typename = std::enable_if_t<comparable<Expr, Case>::value>>
+    bool operator==(Expr&& expr) const
+    {
+        return expr != caseExpr;
+    }
+};
+
+/**
+ * @brief A dummy struct for logic AND
+*/
+template<typename Case1, typename Case2>
+class AND : public Operator
+{
+    Case1 caseExpr1;
+    Case2 caseExpr2;
+public:
+    AND(Case1&& expr1, Case2&& expr2) :caseExpr1(std::move(expr1)), caseExpr2(std::move(expr2)) {}
+
+    template<typename Expr, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
+    bool operator==(Expr&& expr) const
+    {
+        return (caseExpr1 == expr) && (caseExpr2 == expr);
+    }
+
+    template<typename Expr, typename Case1, typename Case2, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
+    friend bool operator==(Expr&& expr, AND<Case1, Case2>&& andCase)
+    {
+        return andCase == expr;
+    }
+};
+
+/**
+ * @brief A dummy struct for logic OR
+*/
+template<typename Case1, typename Case2>
+struct OR
+{
+    Case1 caseExpr1;
+    Case2 caseExpr2;
+public:
+    OR(Case1&& expr1, Case2&& expr2) :caseExpr1(std::move(expr1)), caseExpr2(std::move(expr2)) {}
+
+    template<typename Expr, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
+    bool operator==(Expr&& expr) const
+    {
+        return (caseExpr1 == expr) || (caseExpr2 == expr);
+    }
+
+    template<typename Expr, typename Case1, typename Case2, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
+    friend bool operator==(Expr&& expr, OR<Case1, Case2>&& orCase)
+    {
+        return orCase == expr;
+    }
+};
+
 
 /*For range matching */
 template <typename T, typename T2 = int, typename T3 = typename std::conditional<std::is_integral<T>::value&& std::is_floating_point<T2>::value, double, int>::type>
@@ -92,13 +173,13 @@ auto when(auto&& expr, auto&& to_match, auto&& ReturnResult)
     if constexpr (std::is_same_v<std::remove_reference_t<decltype(to_match)>, bool>)
     {
         if (to_match)
-            return std::move(ReturnResult);
+            return ReturnResult;
     }
     /*If [to_match] is something comparable to [expr]*/
     if constexpr (comparable<decltype(expr), decltype(to_match)>)
     {
         if (to_match == expr)
-            return std::move(ReturnResult);
+            return ReturnResult;
     }
     return ReturnType{};
 }
@@ -155,12 +236,12 @@ auto when(auto&& expr, auto&& case1, auto&& return1, auto&& case2, auto&&... arg
     if constexpr (std::is_same_v<decltype(case1), bool>)
     {
         if (case1)
-            return std::move(return1);
+            return return1;
     }
     if constexpr (comparable<decltype(expr), decltype(case1)>)
     {
         if (case1 == expr)
-            return std::move(return1);
+            return return1;
         else
             return when(expr, case2, args...);
     }
@@ -179,7 +260,7 @@ auto when(auto&& expr, auto&& case1, auto&& return1, auto&& case2, auto&&... arg
 auto when(const char* expr, const char* case1, auto&& return1, auto&& case2, auto&&... args)
 {
     if (strcmp(expr) == strcmp(case1))
-        return std::move(return1);
+        return return1;
     else
         return when(expr, case2, args...);
 }
@@ -237,13 +318,13 @@ auto when(ExprType&& expr, CaseType&& to_match, ReturnType&& ReturnResult)
     if constexpr (std::is_same_v<std::remove_reference_t<CaseType>, bool>)
     {
         if (to_match)
-            return std::move(ReturnResult);
+            return ReturnResult;
     }
     /*If [to_match] is something comparable to [expr]*/
     if constexpr (comparable<ExprType, CaseType>::value)
     {
         if (to_match == expr)
-            return std::move(ReturnResult);
+            return ReturnResult;
     }
     return std::remove_reference_t<ReturnType>{};
 }
@@ -259,14 +340,14 @@ template <typename ExprType, typename is_type, typename ReturnType>
 auto when(ExprType&&, is<is_type>, ReturnType&& ReturnResult)
 {
     if constexpr (std::is_same_v<std::remove_reference_t<ExprType>, typename is<is_type>::type>)
-        return std::move(ReturnResult);
+        return ReturnResult;
     return std::remove_reference_t<ReturnType>{};
 }
 template <typename ExprType, typename is_not_type, typename ReturnType>
 auto when(ExprType&&, is_not<is_not_type>, ReturnType&& ReturnResult)
 {
     if constexpr (!std::is_same_v<std::remove_reference_t<ExprType>, typename is_not<is_not_type>::type>)
-        return std::move(ReturnResult);
+        return ReturnResult;
     return std::remove_reference_t<ReturnType>{};
 }
 
@@ -277,7 +358,7 @@ template <typename ReturnType>
 auto when(const char* Expr, const char* Case, ReturnType&& ReturnResult)
 {
     if (strcmp(Expr, Case) == 0)
-        return std::move(ReturnResult);
+        return ReturnResult;
     return std::remove_reference_t<ReturnType>{};
 }
 
@@ -290,7 +371,7 @@ auto when(const char* Expr, const char* Case, ReturnType&& ReturnResult)
 template <typename ExprType, typename ReturnType>
 auto when(ExprType&&, Else, ReturnType&& ReturnResult)
 {
-    return std::move(ReturnResult);
+    return ReturnResult;
 }
 
 
@@ -303,12 +384,12 @@ auto when(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&&
     if constexpr (std::is_same_v<std::remove_reference_t<Case1Type>, bool>)
     {
         if (case1)
-            return std::move(return1);
+            return return1;
     }
     if constexpr (comparable<ExprType, Case1Type>::value)
     {
         if (case1 == expr)
-            return std::move(return1);
+            return return1;
         else
             return when(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
     }
@@ -322,7 +403,7 @@ template <typename Return1Type, typename Case2Type, typename... Args>
 auto when(const char* Expr, const char* Case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
 {
     if (strcmp(Expr, Case1)==0)
-        return std::move(return1);
+        return return1;
     else
         return when(Expr, std::forward<Case2Type>(case2), std::forward<Args>(args)...);
 }
