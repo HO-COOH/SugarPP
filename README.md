@@ -1,5 +1,5 @@
 # SugarPP
-A collection of my syntaic 🍬 when programming in C++. **When can we have nice things?**
+A collection of my syntactic 🍬 when programming in C++. **When can we have nice things?**
 - [SugarPP](#sugarpp)
   - [Kotlin ``when`` C++ port](#kotlin-when-c-port)
     - [Introduction](#introduction)
