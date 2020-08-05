@@ -1,701 +1,61 @@
-<!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>WhenCpp</title>
-        <style>
-/* From extension zhuangtongfa.material-theme */
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body {
-  box-sizing: border-box;
-  min-width: 200px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote {
-  background-color: initial;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
-  color: initial;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code {
-  color: inherit;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre code {
-  color: initial;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code > div {
-  background: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table th, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table td {
-  border: 1px solid rgba(171, 178, 191, 0.5) !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body.showEditorSelection .code-active-line:before {
-  border-left: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body.showEditorSelection .code-line:hover:before {
-  border-left: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body.showEditorSelection .code-line .code-line:hover:before {
-  border-left: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body p, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
-  margin-top: 16px;
-  margin-bottom: 16px;
-}
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SugarPP</title>
+</head>
+<body>
 
-/* Generated from 'node_modules/github-markdown-css/github-markdown.css' */
-@font-face {
-  font-family: octicons-link;
-  src: url(data:font/woff;charset=utf-8;base64,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) format("woff");
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body {
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-  line-height: 1.5;
-  color: #abb2bf;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  font-size: 16px;
-  line-height: 1.5;
-  word-wrap: break-word;
-  background: #282c34;
-  padding-top: 20px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-c {
-  color: #6a737d;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-c1, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-s .pl-v {
-  color: #005cc5;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-e, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-en {
-  color: #6f42c1;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-smi, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-s .pl-s1 {
-  color: #24292e;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ent {
-  color: #22863a;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-k {
-  color: #d73a49;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-s, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-pds, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-s .pl-pse .pl-s1, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr .pl-cce, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr .pl-sre, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr .pl-sra {
-  color: #032f62;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-v, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-smw {
-  color: #e36209;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-bu {
-  color: #b31d28;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ii {
-  color: #fafbfc;
-  background-color: #b31d28;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-c2 {
-  color: #fafbfc;
-  background-color: #d73a49;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-c2::before {
-  content: "^M";
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sr .pl-cce {
-  font-weight: bold;
-  color: #22863a;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ml {
-  color: #735c0f;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mh, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mh .pl-en, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ms {
-  font-weight: bold;
-  color: #005cc5;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mi {
-  font-style: italic;
-  color: #24292e;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mb {
-  font-weight: bold;
-  color: #24292e;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-md {
-  color: #b31d28;
-  background-color: #ffeef0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mi1 {
-  color: #22863a;
-  background-color: #f0fff4;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mc {
-  color: #e36209;
-  background-color: #ffebda;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mi2 {
-  color: #f6f8fa;
-  background-color: #005cc5;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-mdr {
-  font-weight: bold;
-  color: #6f42c1;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-ba {
-  color: #586069;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-sg {
-  color: #959da5;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-corl {
-  text-decoration: underline;
-  color: #032f62;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .octicon {
-  display: inline-block;
-  vertical-align: text-top;
-  fill: currentColor;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a {
-  background-color: transparent;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a:active, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a:hover {
-  outline-width: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body strong {
-  font-weight: inherit;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body strong {
-  font-weight: bolder;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1 {
-  font-size: 2em;
-  margin: 0.67em 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body img {
-  border-style: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body kbd, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
-  font-family: monospace, monospace;
-  font-size: 1em;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr {
-  box-sizing: content-box;
-  height: 0;
-  overflow: visible;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body input {
-  font: inherit;
-  margin: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body input {
-  overflow: visible;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body [type=checkbox] {
-  box-sizing: border-box;
-  padding: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body * {
-  box-sizing: border-box;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body input {
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a {
-  color: #528bff;
-  text-decoration: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a:hover {
-  text-decoration: underline;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body strong {
-  font-weight: 600;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr {
-  height: 0;
-  margin: 15px 0;
-  overflow: hidden;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid #dfe2e5;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr::before {
-  display: table;
-  content: "";
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr::after {
-  display: table;
-  clear: both;
-  content: "";
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table {
-  border-spacing: 0;
-  border-collapse: collapse;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body td, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body th {
-  padding: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1 {
-  font-size: 32px;
-  font-weight: 600;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2 {
-  font-size: 24px;
-  font-weight: 600;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3 {
-  font-size: 20px;
-  font-weight: 600;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4 {
-  font-size: 16px;
-  font-weight: 600;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5 {
-  font-size: 14px;
-  font-weight: 600;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 {
-  font-size: 12px;
-  font-weight: 600;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body p {
-  margin-top: 0;
-  margin-bottom: 10px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote {
-  margin: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol {
-  padding-left: 0;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ol {
-  list-style-type: lower-roman;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ul ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ol ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ul ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ol ol {
-  list-style-type: lower-alpha;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dd {
-  margin-left: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  font-size: 12px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
-  margin-top: 0;
-  margin-bottom: 0;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  font-size: 12px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .octicon {
-  vertical-align: text-bottom;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-0 {
-  padding-left: 0 !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-1 {
-  padding-left: 4px !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-2 {
-  padding-left: 8px !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-3 {
-  padding-left: 16px !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-4 {
-  padding-left: 24px !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-5 {
-  padding-left: 32px !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .pl-6 {
-  padding-left: 40px !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body::before {
-  display: table;
-  content: "";
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body::after {
-  display: table;
-  clear: both;
-  content: "";
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body > *:first-child {
-  margin-top: 0 !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body > *:last-child {
-  margin-bottom: 0 !important;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body a:not([href]) {
-  color: inherit;
-  text-decoration: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .anchor {
-  float: left;
-  padding-right: 4px;
-  margin-left: -20px;
-  line-height: 1;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .anchor:focus {
-  outline: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body p, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
-  margin-top: 0;
-  margin-bottom: 16px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr {
-  height: 0.25em;
-  padding: 0;
-  margin: 24px 0;
-  background-color: #e1e4e8;
-  border: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote {
-  /* padding: 0 1em;
-  color: #6a737d;
-  border-left: 0.25em solid #dfe2e5; */
-  padding: 8.5px 17px;
-  margin: 1.5em 0;
-  font-size: inherit;
-  color: #7c879c;
-  border-color: #4b5362;
-  border-width: 4px;
-  border-left: 5px solid #4b5362;
-  background: transparent;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote > :first-child {
-  margin-top: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body blockquote > :last-child {
-  margin-bottom: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body kbd {
-  display: inline-block;
-  padding: 3px 5px;
-  font-size: 11px;
-  line-height: 10px;
-  color: #444d56;
-  vertical-align: middle;
-  background-color: #fafbfc;
-  border: solid 1px #c6cbd1;
-  border-bottom-color: #959da5;
-  border-radius: 3px;
-  box-shadow: inset 0 -1px 0 #959da5;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 {
-  margin-top: 24px;
-  margin-bottom: 16px;
-  font-weight: 600;
-  line-height: 1.25;
-  color: #f0f0f0;
-  border-bottom: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5 .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 .octicon-link {
-  color: #1b1f23;
-  vertical-align: middle;
-  visibility: hidden;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5:hover .anchor, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6:hover .anchor {
-  text-decoration: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5:hover .anchor .octicon-link, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6:hover .anchor .octicon-link {
-  visibility: visible;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h1 {
-  padding-bottom: 0.3em;
-  font-size: 2em;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h2 {
-  padding-bottom: 0.3em;
-  font-size: 1.5em;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h3 {
-  font-size: 1.25em;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h4 {
-  font-size: 1em;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h5 {
-  font-size: 0.875em;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body h6 {
-  font-size: 0.85em;
-  color: #6a737d;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol {
-  padding-left: 2em;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ul, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ul ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ol, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body ol ul {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body li {
-  word-wrap: break-all;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body li > p {
-  margin-top: 16px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body li + li {
-  margin-top: 0.25em;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl {
-  padding: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl dt {
-  padding: 0;
-  margin-top: 16px;
-  font-size: 1em;
-  font-style: italic;
-  font-weight: 600;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body dl dd {
-  padding: 0 16px;
-  margin-bottom: 16px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table {
-  display: block;
-  width: 100%;
-  overflow: auto;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table th {
-  font-weight: 700;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table th, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table td {
-  padding: 6px 13px;
-  /* border: 1px solid #dfe2e5; */
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table tr {
-  /* background-color: #fff; */
-  /* border-top: 1px solid #c6cbd1; */
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body table tr:nth-child(2n) {
-  /* background-color: #f6f8fa; */
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body img {
-  max-width: 100%;
-  box-sizing: content-box;
-  display: inline-block;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body img[align=right] {
-  padding-left: 20px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body img[align=left] {
-  padding-right: 20px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body code {
-  padding: 0.2em 0.4em;
-  margin: 0;
-  font-size: 85%;
-  background-color: #3a3f4b;
-  border-radius: 3px;
-  color: white;
-  margin: 0 1px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
-  word-wrap: normal;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre > code {
-  padding: 0;
-  margin: 0;
-  font-size: 100%;
-  word-break: normal;
-  white-space: pre;
-  background: transparent;
-  border: 0;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .highlight {
-  margin-bottom: 16px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .highlight pre {
-  margin-bottom: 0;
-  word-break: normal;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .highlight pre, .vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre {
-  padding: 16px;
-  overflow: auto;
-  font-size: 85%;
-  line-height: 1.45;
-  /* background-color: #f6f8fa; */
-  border-radius: 3px;
-  background-color: #31363f;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body pre code {
-  display: inline;
-  max-width: auto;
-  padding: 0;
-  margin: 0;
-  overflow: visible;
-  line-height: inherit;
-  word-wrap: normal;
-  background-color: transparent;
-  border: 0;
-  color: #abb2bf;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .full-commit .btn-outline:not(:disabled):hover {
-  color: #005cc5;
-  border-color: #005cc5;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body kbd {
-  display: inline-block;
-  padding: 3px 5px;
-  font: 11px "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  line-height: 10px;
-  color: #444d56;
-  vertical-align: middle;
-  background-color: #fafbfc;
-  border: solid 1px #d1d5da;
-  border-bottom-color: #c6cbd1;
-  border-radius: 3px;
-  box-shadow: inset 0 -1px 0 #c6cbd1;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body :checked + .radio-label {
-  position: relative;
-  z-index: 1;
-  border-color: #0366d6;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .task-list-item {
-  list-style-type: none;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .task-list-item + .task-list-item {
-  margin-top: 3px;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body .task-list-item input {
-  margin: 0 0.2em 0.25em -1.6em;
-  vertical-align: middle;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"].vscode-body hr {
-  border-bottom-color: #eee;
-}
-
-/*
-
-Atom One Dark by Daniel Gamage
-Original One Dark Syntax theme from https://github.com/atom/one-dark-syntax
-
-base:    #282c34
-mono-1:  #abb2bf
-mono-2:  #818896
-mono-3:  #5c6370
-hue-1:   #56b6c2
-hue-2:   #61aeee
-hue-3:   #c678dd
-hue-4:   #98c379
-hue-5:   #e06c75
-hue-5-2: #be5046
-hue-6:   #d19a66
-hue-6-2: #e6c07b
-
-*/
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs {
-  display: block;
-  overflow-x: auto;
-  padding: 0.5em;
-  color: #abb2bf;
-  background: #282c34;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-comment,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-quote {
-  color: #5c6370;
-  font-style: italic;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-doctag,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-keyword,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-formula {
-  color: #c678dd;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-section,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-name,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-tag,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-deletion,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-subst {
-  color: #e06c75;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-literal {
-  color: #56b6c2;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-string,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-regexp,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-addition,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-attribute,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-meta-string {
-  color: #98c379;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-built_in,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-class .hljs-title {
-  color: #e6c07b;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-attr,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-variable,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-template-variable,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-type,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-class,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-attr,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-pseudo,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-number {
-  color: #d19a66;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-symbol,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-bullet,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-link,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-meta,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-selector-id,
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-title {
-  color: #61aeee;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-emphasis {
-  font-style: italic;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-strong {
-  font-weight: bold;
-}
-.vscode-dark[data-vscode-theme-name="One Dark Pro"] .hljs-link {
-  text-decoration: underline;
-}
-
-</style>
-        
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
-<style>
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
-                font-size: 14px;
-                line-height: 1.6;
-            }
-        </style>
-        <style>
-.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
-</style>
-        
-        
-        
-    </head>
-    <body class="vscode-light">
-        <p>{::options parse_block_html=&quot;true&quot; /}</p>
-<h1 id="whencpp">WhenCpp</h1>
-<p>A collection of my syntaic sugar when programming in C++. <strong>When can we have nice things?</strong></p>
-<details>
-    <summary>Click to expand!</summary>
-<pre><code>## Kotlin ``when`` C++ port
-A header only port of ``when`` statement/expression in kotlin.
-### Introduction
-In [the official kotlin language tutorial](https://kotlinlang.org/docs/reference/basic-syntax.html#using-when-expression), the ``when`` expression is a pretty nice syntax sugar for replacing traditional ``switch case`` statement seens in most languages. The drawback for ``switch`` at least in C/C++ though is that it only supports matching **integer** values. But the kotlin's ``when`` basically supports these operations:
-- value matching (for all comparable type)
-```kotlin
-when (x) {
+    <h1 id="sugarpp">SugarPP</h1>
+<p>A collection of my syntactic 🍬 when programming in C++. <strong>When can we have nice things?</strong></p>
+<ul>
+<li><a href="#sugarpp">SugarPP</a>
+<ul>
+<li><a href="#kotlin-when-c-port">Kotlin <code>when</code> C++ port</a>
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#requirement">Requirement</a></li>
+<li><a href="#example">Example</a></li>
+<li><a href="#advanced-usage">Advanced Usage</a></li>
+<li><a href="#to-do">To-DO</a></li>
+</ul>
+</li>
+<li><a href="#io">IO</a>
+<ul>
+<li><a href="#introduction-1">Introduction</a></li>
+<li><a href="#usage-1">Usage</a></li>
+<li><a href="#example-1">Example</a></li>
+</ul>
+</li>
+<li><a href="#range">Range</a>
+<ul>
+<li><a href="#introduction-2">Introduction</a></li>
+<li><a href="#example-2">Example</a></li>
+<li><a href="#usage-2">Usage</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="kotlin-when-c-port">Kotlin <code>when</code> C++ port</h2>
+<p>A header only port of <code>when</code> statement/expression in kotlin.</p>
+<h3 id="introduction">Introduction</h3>
+<p>In <a href="https://kotlinlang.org/docs/reference/basic-syntaxhtml#using-when-expression">the official kotlin language tutorial</a>, the <code>when</code> expression is a pretty nice syntax sugar forreplacing traditional <code>switch case</code> statement seens in most languages. The drawback for<code>switch</code> at least in C/C++ though is that it only supports matching <strong>integer</strong> values. Butthe kotlin's <code>when</code> basically supports these operations:</p>
+<ul>
+<li>value matching (for all comparable type)</li>
+</ul>
+<pre><code class="language-kotlin">when (x) {
     1 -&gt; print(&quot;x == 1&quot;)
     2 -&gt; print(&quot;x == 2&quot;)
     else -&gt; { // Note the block
         print(&quot;x is neither 1 nor 2&quot;)
     }
 }
-```
-- type matching
-```kotlin
-fun describe(obj: Any): String =
+</code></pre>
+<ul>
+<li>type matching</li>
+</ul>
+<pre><code class="language-kotlin">fun describe(obj: Any): String =
     when (obj) {
         1          -&gt; &quot;One&quot;
         &quot;Hello&quot;    -&gt; &quot;Greeting&quot;
@@ -703,30 +63,30 @@ fun describe(obj: Any): String =
         !is String -&gt; &quot;Not a string&quot;
         else       -&gt; &quot;Unknown&quot;
     }
-```
-- range matching
-```kotlin
-when (x) {
+</code></pre>
+<ul>
+<li>range matching</li>
+</ul>
+<pre><code class="language-kotlin">when (x) {
     in 1..10 -&gt; print(&quot;x is in the range&quot;)
     in validNumbers -&gt; print(&quot;x is valid&quot;)
     !in 10..20 -&gt; print(&quot;x is outside the range&quot;)
     else -&gt; print(&quot;none of the above&quot;)
 }
-```
-This project tries to mock kotlin's ``when`` in C++. It may sounds stupid, but it shows how powerful ``template`` can be, yet I only used a small portition of its power.
-### Usage
-Just include the ``When.hpp`` header in your project.
-### Requirement
-Any compiler that supports C++17, because if would be so hard to do without ``constexpr if`` (*I may consider adding support for pre C++17 if I am more advanced*)
-I also implemented the same functionality using C++20 concepts because it's cool :)
-### Example
-Example is included in ``main.cpp``. Here I copied them without the comments for a brief intuition.
-```cpp
-#include &quot;When.hpp&quot;
+</code></pre>
+<p>This project tries to mock kotlin's <code>when</code> in C++. It may sounds stupid, but it shows howpowerful <code>template</code> can be, yet I only used a small portition of its power.</p>
+<h3 id="usage">Usage</h3>
+<p>Just include the <code>When/When.hpp</code> header in your project.</p>
+<h3 id="requirement">Requirement</h3>
+<p>Any compiler that supports C<ins>17, because if would be so hard to do without <code>constexpr if</code>(*I may consider adding support for pre C</ins>17 if I am more advanced*)
+I also implemented the same functionality using C++20 concepts because it's cool :)</p>
+<h3 id="example">Example</h3>
+<p>Example is included in <code>main.cpp</code>. Here I copied them without the comments for a briefintuition.</p>
+<pre><code class="language-cpp">#include &quot;When.hpp&quot;
+#include &quot;../IO/IO.hpp&quot; //for print()
 #include &lt;iostream&gt;
 #include &lt;string&gt;
 #include &lt;functional&gt;
-
 using namespace std::literals;
 int main()
 {
@@ -736,9 +96,8 @@ int main()
         2,          std::function{ [] {puts(&quot;x==2&quot;); } },
         Else(),     std::function{ [] {puts(&quot;x is neither 1 nor 2&quot;); } }
     )();//&quot;x==1&quot;
-
     int temperature = 10;
-    puts(when((temperature),
+    print(when((temperature),
               Range(INT_MIN, 0),    &quot;freezing&quot;,
               Range(1, 15),         &quot;cold&quot;,
               Range(16, 20),        &quot;cool&quot;,
@@ -747,62 +106,179 @@ int main()
               Else(),               &quot;WTF?&quot;
     )); //&quot;cold&quot;
 
-
     auto describe = [](auto &amp;&amp;obj) {
         return when((obj),
                     1,                      &quot;One&quot;s,
                     &quot;hello&quot;s,               &quot;Greeting&quot;s,
-                    is&lt;long&gt;{},             &quot;long&quot;s,
-                    is_not&lt;std::string&gt;{},  &quot;Not a string&quot;s,
+                    is&lt;long&gt;(),             &quot;long&quot;s,
+                    is_not&lt;std::string&gt;(),  &quot;Not a string&quot;s,
                     Else(),                 &quot;Unknown string&quot;s);
     };
-    std::cout &lt;&lt; describe(1) &lt;&lt; '\n';                   //&quot;One&quot;
-    std::cout &lt;&lt; describe(&quot;hello&quot;s) &lt;&lt; '\n';            //&quot;Greeting&quot;
-    std::cout &lt;&lt; describe(1000l) &lt;&lt; '\n';               //&quot;long&quot;
-    std::cout &lt;&lt; describe(2) &lt;&lt; '\n';                   //&quot;Not a string&quot;
-    std::cout &lt;&lt; describe(&quot;random string&quot;s) &lt;&lt; '\n';    //&quot;Unknown string&quot;
-
+    print(describe(1));                   //&quot;One&quot;
+    print(describe(&quot;hello&quot;s));            //&quot;Greeting&quot;
+    print(describe(1000l));               //&quot;long&quot;
+    print(describe(2));                   //&quot;Not a string&quot;
+    print(describe(&quot;random string&quot;s));    //&quot;Unknown string&quot;
     /*C string is also supported*/
     auto describe2 = [](auto&amp;&amp; obj) {
         return when((obj),
             1,                              &quot;One&quot;,
             &quot;hello&quot;,                        &quot;Greeting&quot;,
-            is&lt;long&gt;{},                     &quot;long&quot;,
-            is_not&lt;const char*&gt;{},          &quot;Not a string&quot;,
+            is&lt;long&gt;(),                     &quot;long&quot;,
+            is_not&lt;const char*&gt;(),          &quot;Not a string&quot;,
             Else(),                         &quot;Unknown string&quot;);
     };
-    puts(describe2(1));                 //&quot;One&quot;
-    puts(describe2(&quot;hello&quot;));           //&quot;Greeting&quot;
-    puts(describe2(1000l));             //&quot;long&quot;
-    puts(describe2(2));                 //&quot;Not a string&quot;
-    puts(describe2(&quot;random string&quot;));   //&quot;Unknown string&quot;
+    print(describe2(1));                 //&quot;One&quot;
+    print(describe2(&quot;hello&quot;));           //&quot;Greeting&quot;
+    print(describe2(1000l));             //&quot;long&quot;
+    print(describe2(2));                 //&quot;Not a string&quot;
+    print(describe2(&quot;random string&quot;));   //&quot;Unknown string&quot;
 }
-```
-### Advanced Usage
-Now it supports grouped logical expression in matching branches, like ``AND, OR, NOT``.
-
-You can find the implementation in ``GroupedCondition.hpp``.
-An example (also included in ``main.cpp``):
-```cpp
-    auto describe = [](auto &amp;&amp;obj) {
+</code></pre>
+<h3 id="advanced-usage">Advanced Usage</h3>
+<p>Now it supports grouped logical expression in matching branches, like <code>AND, OR, NOT</code>.
+You can find the implementation in <code>GroupedCondition.hpp</code>.
+An example (also included in <code>main.cpp</code>):</p>
+<pre><code class="language-cpp">    auto describe = [](auto &amp;&amp;obj) {
         return when((obj),    
-                    OR{ 1,2 },                  &quot;One or two&quot;s,
+                    OR(1,2),                  &quot;One or two&quot;s,
                     &quot;hello&quot;s,                   &quot;Greeting&quot;s,
-                    is&lt;long&gt;{},                 &quot;long&quot;s,
-                    NOT{is&lt;std::string&gt;{} },    &quot;Not a string&quot;s,
+                    is&lt;long&gt;(),                 &quot;long&quot;s,
+                    NOT(is&lt;std::string&gt;()),    &quot;Not a string&quot;s,
                     Else(),                     &quot;Unknown string&quot;s);
     };
-    std::cout &lt;&lt; describe(1) &lt;&lt; '\n';                   //&quot;One or two&quot;
-    std::cout &lt;&lt; describe(&quot;hello&quot;s) &lt;&lt; '\n';            //&quot;Greeting&quot;
-    std::cout &lt;&lt; describe(1000l) &lt;&lt; '\n';               //&quot;long&quot;
-    std::cout &lt;&lt; describe(2) &lt;&lt; '\n';                   //&quot;Not a string&quot;
-    std::cout &lt;&lt; describe(&quot;random string&quot;s) &lt;&lt; '\n';    //&quot;Unknown string&quot;
-```
-### To-DO
-- ~~Support for direct contrary operation (for example, ``!is&lt;long&gt;`` instead of ``is_not&lt;long&gt;``).~~ √
-- Better lambda support in matching branches
+    print(describe(1));                   //&quot;One or two&quot;
+    print(describe(&quot;hello&quot;s));            //&quot;Greeting&quot;
+    print(describe(1000l));               //&quot;long&quot;
+    print(describe(2));                   //&quot;Not a string&quot;
+    print(describe(&quot;random string&quot;s));    //&quot;Unknown string&quot;
 </code></pre>
-</details>
+<h3 id="to-do">To-DO</h3>
+<ul>
+<li><del>Support for direct contrary operation (for example, <code>!is&lt;long&gt;</code> instead of<code>is_not&lt;long&gt;</code>).</del> √</li>
+<li>Better lambda support in matching branches</li>
+</ul>
+<h2 id="io">IO</h2>
+<p>A convenient helper function for substitute <code>std::cin</code> that just <strong>works as you intended.</strong> No more <code>getchar()</code> for <em>eating</em> the enter key nonsense! Let <code>print() / printLn()</code> helps to eliminate ugly <code>::</code> and <code>&lt;&lt;</code></p>
+<h3 id="introduction-1">Introduction</h3>
+<p>The <code>input</code> template function is similar to <code>python</code>. It prints a <code>prompt</code> message and does the following things with error handling, which means clearing any bad bit and ignores the rest of the input and can be specify to <code>retry</code> until the user entered the right thing. (<strong>default is retry enabled</strong>)</p>
+<ul>
+<li>If the type is a primitive, it works the same as <code>std::cin &gt;&gt;</code>
+<ul>
+<li>If the type is <code>unsigned</code> number type, and it receives a negative number, it converts to the absolute value</li>
+</ul>
+</li>
+<li>If the type is <code>std::string</code>, it works the same as <code>std::getline</code></li>
+</ul>
+<p>The <code>print()</code> function template prints <strong>ANY</strong> number of arguments, separated by a template argument <code>delim</code> (default to a space).</p>
+<p>The <code>printLn()</code> function template prints <strong>ANY</strong> number of arguments, one line at a time.</p>
+<h3 id="usage-1">Usage</h3>
+<p>Just include <code>./IO/IO.hpp</code>.</p>
+<h3 id="example-1">Example</h3>
+<p>A more detailed example is in <code>./IO/main.cpp</code></p>
+<pre><code class="language-cpp">#include &quot;IO.hpp&quot;
+int main()
+{
+    auto date = input&lt;int&gt;(&quot;Today's data: &quot;);
+    auto day = input&lt;std::string&gt;(&quot;What day is today? &quot;);
+    auto someChar = input&lt;char&gt;(&quot;Enter a character: &quot;, false);  //retry disabled
 
-    </body>
-    </html>
+    print(&quot;Today is&quot;, date, &quot;, &quot;, day);
+}
+</code></pre>
+<h2 id="range">Range</h2>
+<p>Simplify your <code>for</code> loop and everything you want from a numerical range.
+<em>Not to be confused with C++20 ranges!</em></p>
+<h3 id="introduction-2">Introduction</h3>
+<p>In tons of other programming languages, there are the similar syntax as follows:</p>
+<pre><code>for(var i in [0..10])
+{...}
+
+for i, v in enumerate(someArray):
+    # python syntax
+</code></pre>
+<p>My <code>Range</code> class template suppors:</p>
+<ul>
+<li>With sepecified <code>start</code>, <code>end</code> and <code>step (default = 1)</code>, which can be used in C++ range-based for loop. Type will be inferred (with C++17), and if there is discrepancy, will be converted to the right type</li>
+<li>Generate random number in the range</li>
+<li>Fill a container with random number</li>
+</ul>
+<p>My <code>Enumerate</code> class template is also used in range-based for loop. And returns a <code>std::pair</code> of <code>index</code> and an <code>iterator</code> from an <code>iterable</code> of the constructed <code>Enumerate</code> class. And it's better to be used together with structured-binding (C++17), eg: <code>for(auto [i, v] : Enumerate(someArray))</code></p>
+<h3 id="example-2">Example</h3>
+<pre><code class="language-cpp">#include &quot;../IO/IO.hpp&quot; //for print()
+#include &quot;Range.hpp&quot;
+#include &quot;Enumerate.hpp&quot;
+int main()
+{
+    /*use Range in range-based for loop*/
+    for (auto i : Range(0, 10))
+        print(i);
+
+    /*use range for a random number*/
+    Range r(-1, 100000);
+    print(&quot;Random number in &quot;, r, &quot; is &quot;, r.rand());
+
+    /*use range to fill a C style array*/
+    double arr[10];
+    Range(-500.0, 500.0).fillRand(arr);
+
+    /*use range to fill a STL container*/
+    std::array&lt;char, 20&gt; arr2;
+    Range('A', 'z').fillRand(arr2);
+
+    /*Alternatively .randFast() provides a faster way for generating random number using rand() in C*/
+    int arr3[10];
+    Range(-200, 300).fillRandFast(arr3);
+
+    std::array arr{ &quot;cpp&quot;, &quot;sugar&quot;, &quot;sweet&quot; };
+    for(auto [index, string]:Enumerate(arr))
+        print&lt;'\t'&gt;(index, string);
+    /*
+        0       cpp
+        1       sugar
+        2       sweet
+    */
+
+    print(&quot;1D range&quot;);
+    for (auto i : Range(2.0, 10.0, 3))
+        print(i);
+    
+    /*
+        1D range
+        2
+        5
+        8
+    */
+    print(&quot;2D range&quot;);
+    for (auto [i, j] : Range(-5, 1) | Range(0, 3))
+        print(i, '\t', j);
+
+    /*
+        2D range
+        -5       0
+        -5       1
+        -5       2
+        -4       0
+        -4       1
+        -4       2
+        -3       0
+        -3       1
+        -3       2
+        -2       0
+        -2       1
+        -2       2
+        -1       0
+        -1       1
+        -1       2
+        0        0
+        0        1
+        0        2
+    */
+}
+</code></pre>
+<h3 id="usage-2">Usage</h3>
+<p>Just include <code>./Range/Range.hpp</code> for <code>Range</code> and <code>./Enumerate/Enumerate.hpp</code> for <code>Enumerate</code></p>
+
+
+</body>
+</html>

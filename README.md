@@ -217,6 +217,42 @@ int main()
         1       sugar
         2       sweet
     */
+
+    print("1D range");
+    for (auto i : Range(2.0, 10.0, 3))
+        print(i);
+    
+    /*
+        1D range
+        2
+        5
+        8
+    */
+    print("2D range");
+    for (auto [i, j] : Range(-5, 1) | Range(0, 3))
+        print(i, '\t', j);
+
+    /*
+        2D range
+        -5       0
+        -5       1
+        -5       2
+        -4       0
+        -4       1
+        -4       2
+        -3       0
+        -3       1
+        -3       2
+        -2       0
+        -2       1
+        -2       2
+        -1       0
+        -1       1
+        -1       2
+        0        0
+        0        1
+        0        2
+    */
 }
 ```
 ### Usage

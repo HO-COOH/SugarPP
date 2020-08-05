@@ -1,4 +1,5 @@
 #include "Range.hpp"
+#include "../IO/IO.hpp"
 #include "Enumerate.hpp"
 #include <iostream>
 #include <array>
@@ -34,5 +35,16 @@ int main()
         std::array arr{ "cpp", "sugar", "sweet" };
         for(auto [index, string]:Enumerate(arr))
             std::cout << index << '\t' << string << '\n';
+    }
+    {
+        print("1D range");
+        for (auto i : Range(2.0, 10.0, 3))
+            print(i);
+
+        print("2D range");
+        for (auto [i, j] : Range(-5, 1) | Range(0, 3))
+            print(i, '\t', j);
+
+        std::cin.get();
     }
 }
