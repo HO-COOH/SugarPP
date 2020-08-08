@@ -9,7 +9,7 @@
 class RangeRandomEngineBase
 {
 protected:
-    static inline std::mt19937 rdEngine{std::random_device{}()};
+    static inline std::mt19937 rdEngine{ std::random_device{}() };
 };
 
 //forward declaration for Range because it is needed in MultiRange::operator|()
@@ -22,7 +22,7 @@ class MultiRange
     std::tuple<Ranges...> ranges;
 public:
     MultiRange(Ranges...ranges) :ranges{ ranges... } {}
-    MultiRange(std::tuple<Ranges...> ranges):ranges{ranges}{}
+    MultiRange(std::tuple<Ranges...> ranges) :ranges{ ranges } {}
     template<typename RangeIteratorTuple, typename EndValueTuple>
     class MultiRangeIterator
     {
@@ -101,10 +101,10 @@ public:
 
 
 template <typename T, typename T2, typename T3>
-class Range: RangeRandomEngineBase
+class Range : RangeRandomEngineBase
 {
-    T3 const min;
-    T3 const max;
+    T3 min;
+    T3 max;
     T2 const step;
 public:
     Range(T start, T end, T2 step = 1) : min(static_cast<T3>(start)), max(static_cast<T3>(end)), step(step) {}
@@ -120,11 +120,20 @@ public:
         RangeIterator(T3 start, T2 step) : start(start), current(start), step(step) {}
         RangeIterator& operator++()
         {
-            current += step;
+            if constexpr (std::is_arithmetic_v<T3>)
+                current += step;
+            else
+                std::advance(current, step);
             return *this;
         }
-        T3 operator*() { return current; }
-        bool operator!=(const RangeIterator& iter) const { return current < iter.current; }
+        T3& operator*() { return current; }
+        bool operator!=(const RangeIterator& iter) const
+        {
+            if constexpr (std::is_arithmetic_v<T3>)
+                return current < iter.current;
+            else
+                return current != iter.current;
+        }
         bool operator==(const RangeIterator& iter) const { return current == iter.current; }
         void rewind() { current = start; }
     };
@@ -132,20 +141,20 @@ public:
     auto end() { return RangeIterator(max, step); }
 
     /*Random number functions*/
-    [[nodiscard]]auto rand()
+    [[nodiscard]] auto rand()
     {
-        if constexpr(std::is_integral_v<T3>)
+        if constexpr (std::is_integral_v<T3>)
         {
             static std::uniform_int_distribution<std::conditional_t<std::is_same_v<T, char>, int, T3>> rdInt{ min, max };
             return rdInt(rdEngine);
         }
-        if constexpr(std::is_floating_point_v<T3>)
+        if constexpr (std::is_floating_point_v<T3>)
         {
             static std::uniform_real_distribution<T3> rdDouble{ min, max };
             return rdDouble(rdEngine);
         }
     }
-    [[nodiscard]]T3 randFast() const
+    [[nodiscard]] T3 randFast() const
     {
         return (static_cast<double>(::rand()) / RAND_MAX) * (max - min) + min;
     }
