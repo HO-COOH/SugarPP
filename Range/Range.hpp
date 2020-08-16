@@ -20,76 +20,44 @@ template<typename... Ranges>
 class MultiRange
 {
     std::tuple<Ranges...> ranges;
+
+    template<size_t I=std::tuple_size_v<decltype(ranges)>-1>
+    void incRange()
+    {
+        if(auto& range=std::get<I>(ranges); (++range).current == range.max)
+        {
+            if constexpr(I!=0)
+            {
+                range.rewind();
+                incRange<I - 1>();
+            }
+        }
+    }
 public:
     MultiRange(Ranges...ranges) :ranges{ ranges... } {}
     MultiRange(std::tuple<Ranges...> ranges) :ranges{ ranges } {}
-    template<typename RangeIteratorTuple, typename EndValueTuple>
-    class MultiRangeIterator
-    {
-        RangeIteratorTuple iters;
-        const EndValueTuple endValues;
-
-        template<size_t I = 0, typename...T, typename Func>
-        static inline void tuple_apply_each(std::tuple<T...>& t, Func&& func)
-        {
-            func(std::get<I>(t));
-            if constexpr (I + 1 != sizeof...(T))
-                tuple_apply_each<I + 1>(t, std::forward<Func>(func));
-        }
-
-        template<size_t I = 0, typename...T, typename Func>
-        static inline void tuple_apply_I(std::tuple<T...>& t, Func&& func)
-        {
-            func(std::get<I>(t));
-        }
-
-        template<size_t I = 0, typename Tuple1, typename Tuple2>
-        static inline bool iters_equal(Tuple1 const& t1, Tuple2 const& t2)
-        {
-            if (std::get<I>(t1) != std::get<I>(t2))
-                return false;
-            if constexpr (I + 1 != std::tuple_size_v<Tuple1>)
-                return iters_equal<I + 1>(t1, t2);
-            return true;
-        }
-
-        template<size_t I = std::tuple_size_v<RangeIteratorTuple> -1 >
-        void incIter()
-        {
-            if (auto& iter = std::get<I>(iters); ++iter == std::get<I>(endValues))
-            {
-                if constexpr (I != 0)
-                {
-                    iter.rewind();
-                    incIter<I - 1>();
-                }
-            }
-        }
-
-    public:
-        MultiRangeIterator(RangeIteratorTuple iters, EndValueTuple endValues) : iters{ iters }, endValues{ endValues } {}
-        MultiRangeIterator& operator++()
-        {
-            incIter();
-            return *this;
-        }
-        auto operator*()
-        {
-            return std::apply([](auto&... iters) { return std::make_tuple(*iters...); }, iters);
-        }
-        bool operator!=(MultiRangeIterator const& rhs) const
-        {
-            return std::get<0>(iters) != std::get<0>(endValues);
-        }
-    };
 
     auto begin()
     {
-        return std::apply([](auto&... ranges) { return MultiRangeIterator{ std::make_tuple(ranges.begin()...), std::make_tuple(ranges.end()...) }; }, ranges);
+        return *this;
     }
     auto end()
     {
-        return std::apply([](auto&... ranges) {return MultiRangeIterator{ std::make_tuple(ranges.end()...), std::make_tuple(ranges.end()...) }; }, ranges);
+        return std::apply([](auto&... ranges) { return std::make_tuple(ranges.end()...); }, ranges);
+    }
+    MultiRange& operator++()
+    {
+        incRange();
+        return *this;
+    }
+    template<typename EndValueTuple>
+    bool operator!=(EndValueTuple const& rhs)
+    {
+        return std::get<0>(ranges) != std::get<0>(rhs);
+    }
+    auto operator*() const
+    {
+        return std::apply([](auto&... ranges) { return std::make_tuple(*ranges...); }, ranges);
     }
 
     template<typename Range>
@@ -103,60 +71,49 @@ public:
 template <typename T, typename T2, typename T3>
 class Range : RangeRandomEngineBase
 {
-    T3 min;
-    T3 max;
+    T3 const start;
+    T3 current;
+    T3 const max;
     T2 const step;
 public:
-    Range(T start, T end, T2 step = 1) : min(static_cast<T3>(start)), max(static_cast<T3>(end)), step(step) {}
-    /*RangeIterator which can be used in range-based for loop*/
-    class RangeIterator
+    Range(T start, T end, T2 step = 1) : start(static_cast<T3>(start)), current(static_cast<T3>(start)), max(static_cast<T3>(end)), step(step) {}
+    auto operator*() const { return current; }
+    auto begin() { return *this; }
+    auto end() const { return max; }
+    bool operator!=(Range rhs) const
+    { 
+        if constexpr (std::is_arithmetic_v<T3>)
+            return current < rhs.current;
+        else
+            return current != rhs.current;
+    }
+    bool operator!=(T3 value) const
     {
-        const T3 start;
-        T3 current;
-        const T2 step;
-    public:
-        using value_type = T3;
-        using step_type = T2;
-        RangeIterator(T3 start, T2 step) : start(start), current(start), step(step) {}
-        RangeIterator& operator++()
-        {
-            if constexpr (std::is_arithmetic_v<T3>)
-                current += step;
-            else
-                std::advance(current, step);
-            return *this;
-        }
-        T3& operator*() { return current; }
-        bool operator!=(const RangeIterator& iter) const
-        {
-            if constexpr (std::is_arithmetic_v<T3>)
-                return current < iter.current;
-            else
-                return current != iter.current;
-        }
-        bool operator==(const RangeIterator& iter) const { return current == iter.current; }
-        void rewind() { current = start; }
-    };
-    auto begin() { return RangeIterator(min, step); }
-    auto end() { return RangeIterator(max, step); }
+        if constexpr (std::is_arithmetic_v<T3>)
+            return current < value;
+        else
+            return current != value;
+    }
+    Range& operator++() { ++current; return *this; }
+    void rewind() { current = start; }
 
     /*Random number functions*/
     [[nodiscard]] auto rand()
     {
         if constexpr (std::is_integral_v<T3>)
         {
-            static std::uniform_int_distribution<std::conditional_t<std::is_same_v<T, char>, int, T3>> rdInt{ min, max };
+            static std::uniform_int_distribution<std::conditional_t<std::is_same_v<T, char>, int, T3>> rdInt{ current, max };
             return rdInt(rdEngine);
         }
         if constexpr (std::is_floating_point_v<T3>)
         {
-            static std::uniform_real_distribution<T3> rdDouble{ min, max };
+            static std::uniform_real_distribution<T3> rdDouble{ current, max };
             return rdDouble(rdEngine);
         }
     }
     [[nodiscard]] T3 randFast() const
     {
-        return (static_cast<double>(::rand()) / RAND_MAX) * (max - min) + min;
+        return (static_cast<double>(::rand()) / RAND_MAX) * (max - current) + current;
     }
 
     template<typename Container>
@@ -188,7 +145,7 @@ public:
     template <typename Num, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
     friend bool operator==(Num number, Range const& rhs)
     {
-        return (number >= rhs.min) && (number <= rhs.max);
+        return (number >= rhs.current) && (number <= rhs.max);
     }
 
     template<typename Num, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
@@ -199,7 +156,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream& os, Range const& range)
     {
-        os << '[' << range.min << ',' << range.max << ']';
+        os << '[' << range.current << ',' << range.max << ']';
         return os;
     }
 

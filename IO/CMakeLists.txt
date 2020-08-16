@@ -4,4 +4,4 @@ project(WhenCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(IO main.cpp "print.hpp")
+add_executable(IO main.cpp)

@@ -11,7 +11,7 @@ inline void restore(std::istream& is)
 template <typename T>
 [[nodiscard]] T input(const char* prompt = nullptr, bool retry = true)
 {
-    T i;
+    T i{};
     if (!retry)
     {
         if (prompt)
@@ -89,12 +89,6 @@ T input(std::string_view prompt, bool retry = true)
 }
 #endif
 
-#if __cplusplus > 201703L
-void printLn(auto &&... args)
-{
-    ((std::cout << args << '\n'), ...);
-}
-#endif
 
 template <char delim = ' ', std::ostream& os = std::cout, typename... Args>
 void print(Args &&... args)
@@ -108,3 +102,33 @@ void printLn(Args &&... args)
 {
     ((os << args << '\n'), ...);
 }
+
+#include <fstream>
+template<typename Char=char>
+class FileIterator
+{
+    std::ifstream fs;
+public:
+    using value_type = std::basic_string<Char>;
+    using difference_type = std::ptrdiff_t;
+    using pointer = std::basic_string<Char>*;
+    using reference = std::basic_string<Char>&;
+    using iterator_category = std::forward_iterator_tag;
+
+    FileIterator(Char const* fileName);
+    FileIterator(std::basic_string<Char> const& fileName);
+
+#if __cplusplus >= 201703L
+    FileIterator(std::basic_string_view<Char> const fileName);
+    FileIterator(std::filesystem::directory_entry const& file);
+#endif
+    value_type operator*() const
+    {
+        
+    }
+    FileIterator& operator++()
+    {
+        
+    }
+
+};
