@@ -47,5 +47,13 @@ int main()
 
         std::cin.get();
     }
-
+    {
+        std::vector<int> v(20);
+        parallel(Range(0ull, v.size()), 
+            [&](auto range)
+            {
+                for (auto index : range) process(v[index]);
+            }
+        );
+    }
 }

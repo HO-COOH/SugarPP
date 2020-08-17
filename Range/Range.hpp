@@ -21,12 +21,12 @@ class MultiRange
 {
     std::tuple<Ranges...> ranges;
 
-    template<size_t I=std::tuple_size_v<decltype(ranges)>-1>
+    template<size_t I = std::tuple_size_v<decltype(ranges)>-1>
     void incRange()
     {
-        if(auto& range=std::get<I>(ranges); (++range).current == range.max)
+        if (auto& range = std::get<I>(ranges); (++range).current == range.max)
         {
-            if constexpr(I!=0)
+            if constexpr (I != 0)
             {
                 range.rewind();
                 incRange<I - 1>();
@@ -50,6 +50,10 @@ public:
         incRange();
         return *this;
     }
+    //bool operator!=(MultiRange const& rhs) const
+    //{
+    //    return std::get<0>(ranges) != std::get<0>(rhs.ranges);
+    //}
     template<typename EndValueTuple>
     bool operator!=(EndValueTuple const& rhs)
     {
@@ -74,14 +78,16 @@ class Range : RangeRandomEngineBase
     T3 const start;
     T3 current;
     T3 const max;
-    T2 const step;
 public:
+    T2 const step;
+    using value_type = T3;
     Range(T start, T end, T2 step = 1) : start(static_cast<T3>(start)), current(static_cast<T3>(start)), max(static_cast<T3>(end)), step(step) {}
     auto operator*() const { return current; }
     auto begin() { return *this; }
-    auto end() const { return max; }
+    auto end() { return max; }
+    auto steps() const { return (max - current) / step + 1; }
     bool operator!=(Range rhs) const
-    { 
+    {
         if constexpr (std::is_arithmetic_v<T3>)
             return current < rhs.current;
         else
@@ -95,6 +101,7 @@ public:
             return current != value;
     }
     Range& operator++() { ++current; return *this; }
+    Range& operator+=(unsigned i) { current += i * step; return *this; }
     void rewind() { current = start; }
 
     /*Random number functions*/
@@ -102,13 +109,11 @@ public:
     {
         if constexpr (std::is_integral_v<T3>)
         {
-            static std::uniform_int_distribution<std::conditional_t<std::is_same_v<T, char>, int, T3>> rdInt{ current, max };
-            return rdInt(rdEngine);
+            return std::uniform_int_distribution<std::conditional_t<std::is_same_v<T, char>, int, T3>>{ current, max }(rdEngine);
         }
         if constexpr (std::is_floating_point_v<T3>)
         {
-            static std::uniform_real_distribution<T3> rdDouble{ current, max };
-            return rdDouble(rdEngine);
+            return std::uniform_real_distribution<T3>{ current, max }(rdEngine);
         }
     }
     [[nodiscard]] T3 randFast() const
@@ -119,12 +124,26 @@ public:
     template<typename Container>
     void fillRand(Container& container)
     {
-        std::generate(std::begin(container), std::end(container), [this] {return rand(); });
+        fillRand(std::begin(container), std::end(container));
     }
     template<typename InputIt>
     void fillRand(InputIt begin, InputIt end)
     {
-        std::generate(begin, end, [this] {return rand(); });
+        if constexpr (std::is_integral_v<T3>)
+        {
+            //The maximum value of std::uniform_int_distribution is inclusive so need to -1 to exclude the max value edge case
+            std::generate(begin, end, [rdInt = std::uniform_int_distribution<std::conditional_t<std::is_same_v<T, char>, int, T3>>{ current, max - 1 }]() mutable
+            {
+                return rdInt(rdEngine);
+            });
+        }
+        if constexpr (std::is_floating_point_v<T3>)
+        {
+            std::generate(begin, end, [rdFloat = std::uniform_real_distribution<T3>{ current, max }]() mutable
+            {
+                return rdFloat(rdEngine);
+            });
+        }
     }
     template<typename Container>
     void fillRandFast(Container& container) const
@@ -170,3 +189,57 @@ public:
     }
 };
 
+#include <thread>
+#include <vector>
+
+/**
+ * @brief A parallel for loop for a specific range
+ * @tparam Range The type of [range], which is of the form: Range<value_type, value_type, stepSizeType>
+ * @tparam Func The type of [func], which is of the form: Func<ReturnType(Range)>
+ * @param range The range loop variable
+ * @param func Should be a function that takes a range as parameter and may or may not return stuff
+ * @param threadCount The hint of number of threads to launch. The real number of threads depend on the number of steps in [range]
+ * @return std::vector<ReturnType> / void if [func] returns void
+*/
+template<typename RangeType, typename Func>
+auto parallel(RangeType range, Func&& func, unsigned threadCount = std::thread::hardware_concurrency())
+{
+    /* If there are 7 tasks but 8 threads, we only launch 7 threads
+     *
+     */
+    const auto steps = range.steps();
+    const auto threadNum = std::min<std::common_type_t<decltype(steps), decltype(threadCount)>>(steps, threadCount);
+    const auto perThread = steps / threadNum;
+    std::vector<std::thread> threads;
+    threads.reserve(threadNum);
+
+    using result_type = std::invoke_result_t<std::remove_reference_t<Func>, RangeType>;
+
+    if constexpr (std::is_same_v<result_type, void>)
+    {
+        //for the first (threadNum-1) threads
+        for (auto i = 0; i < threadNum - 1; ++i)
+        {
+            threads.emplace_back([&func, &range, perThread] { func(Range{ *range, *(range += perThread), range.step }); });
+        }
+        //the last thread
+        threads.emplace_back([&func, &range] {func(Range{ *(++range), range.end(), range.step }); });
+        for (auto& thread : threads)
+            thread.join();
+        return;
+    }
+    else
+    {
+        std::vector<result_type> results;
+        results.reserve(threadNum);
+        for (auto i = 0; i < threadNum; ++i)
+        {
+            threads.emplace_back([&func, &range, perThread, &results] { results.emplace_back(std::forward<result_type>(func(Range{ *range, *(range += perThread), range.step }))); });
+        }
+        //the last thread
+        threads.emplace_back([&func, &range, &results] {results.emplace_back(std::forward<result_type>(func(Range{ *range, range.end(), range.step }))); });
+        for (auto& thread : threads)
+            thread.join();
+        return results;
+    }
+}
