@@ -49,10 +49,11 @@ int main()
     }
     {
         std::vector<int> v(20);
-        parallel(Range(0ull, v.size()), 
-            [&](auto range)
+        auto process = [](auto&& v) {print(v); };
+        parallel(Range(0ull, v.size()), [&](auto range)
             {
-                for (auto index : range) process(v[index]);
+                for (auto index : range)
+                    process(index);
             }
         );
     }

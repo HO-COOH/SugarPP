@@ -20,7 +20,7 @@ template<typename... Ranges>
 class MultiRange
 {
     std::tuple<Ranges...> ranges;
-
+    std::tuple<typename Ranges::value_type...> startValues;
     template<size_t I = std::tuple_size_v<decltype(ranges)>-1>
     void incRange()
     {
@@ -28,14 +28,14 @@ class MultiRange
         {
             if constexpr (I != 0)
             {
-                range.rewind();
+                range.current = std::get<I>(startValues);
                 incRange<I - 1>();
             }
         }
     }
 public:
-    MultiRange(Ranges...ranges) :ranges{ ranges... } {}
-    MultiRange(std::tuple<Ranges...> ranges) :ranges{ ranges } {}
+    MultiRange(Ranges...ranges) :ranges{ ranges... }, startValues{ranges.current ...} {}
+    MultiRange(std::tuple<Ranges...> ranges) :ranges{ ranges }, startValues{ ranges.current ... } {}
 
     auto begin()
     {
@@ -75,13 +75,12 @@ public:
 template <typename T, typename T2, typename T3>
 class Range : RangeRandomEngineBase
 {
-    T3 const start;
     T3 current;
     T3 const max;
 public:
     T2 const step;
     using value_type = T3;
-    Range(T start, T end, T2 step = 1) : start(static_cast<T3>(start)), current(static_cast<T3>(start)), max(static_cast<T3>(end)), step(step) {}
+    Range(T start, T end, T2 step = 1) : current(static_cast<T3>(start)), max(static_cast<T3>(end)), step(step) {}
     auto operator*() const { return current; }
     auto begin() { return *this; }
     auto end() { return max; }
@@ -102,9 +101,23 @@ public:
     }
     Range& operator++() { ++current; return *this; }
     Range& operator+=(unsigned i) { current += i * step; return *this; }
-    void rewind() { current = start; }
 
     /*Random number functions*/
+    [[nodiscard]] auto getDistribution() const
+    {
+        if constexpr (std::is_integral_v<T3>)
+        {
+            return std::uniform_int_distribution<std::conditional_t<std::is_same_v<T, char>, int, T3>>{ current, max };
+        }
+        if constexpr (std::is_floating_point_v<T3>)
+        {
+            return std::uniform_real_distribution<T3>{ current, max };
+        }
+    }
+    [[nodiscard]] static inline auto& getRandomEngine()
+    {
+        return rdEngine;
+    }
     [[nodiscard]] auto rand()
     {
         if constexpr (std::is_integral_v<T3>)
@@ -125,6 +138,26 @@ public:
     void fillRand(Container& container)
     {
         fillRand(std::begin(container), std::end(container));
+    }
+    template<typename Container>
+    void fillRand(Container& container, size_t count)
+    {
+        auto begin = std::begin(container);
+        if constexpr (std::is_integral_v<T3>)
+        {
+            //The maximum value of std::uniform_int_distribution is inclusive so need to -1 to exclude the max value edge case
+            std::generate_n(std::back_inserter(begin), count, [rdInt = std::uniform_int_distribution<std::conditional_t<std::is_same_v<T, char>, int, T3>>{ current, max - 1 }]() mutable
+            {
+                return rdInt(rdEngine);
+            });
+        }
+        if constexpr (std::is_floating_point_v<T3>)
+        {
+            std::generate_n(std::back_inserter(begin), count, [rdFloat = std::uniform_real_distribution<T3>{ current, max }]() mutable
+            {
+                return rdFloat(rdEngine);
+            });
+        }
     }
     template<typename InputIt>
     void fillRand(InputIt begin, InputIt end)
@@ -192,6 +225,7 @@ public:
 #include <thread>
 #include <vector>
 
+
 /**
  * @brief A parallel for loop for a specific range
  * @tparam Range The type of [range], which is of the form: Range<value_type, value_type, stepSizeType>
@@ -203,6 +237,7 @@ public:
 */
 template<typename RangeType, typename Func>
 auto parallel(RangeType range, Func&& func, unsigned threadCount = std::thread::hardware_concurrency())
+->std::enable_if_t< std::is_same_v<std::invoke_result_t<std::remove_reference_t<Func>, RangeType>, void>>
 {
     /* If there are 7 tasks but 8 threads, we only launch 7 threads
      *
@@ -213,33 +248,36 @@ auto parallel(RangeType range, Func&& func, unsigned threadCount = std::thread::
     std::vector<std::thread> threads;
     threads.reserve(threadNum);
 
-    using result_type = std::invoke_result_t<std::remove_reference_t<Func>, RangeType>;
 
-    if constexpr (std::is_same_v<result_type, void>)
-    {
-        //for the first (threadNum-1) threads
-        for (auto i = 0; i < threadNum - 1; ++i)
-        {
-            threads.emplace_back([&func, &range, perThread] { func(Range{ *range, *(range += perThread), range.step }); });
-        }
-        //the last thread
-        threads.emplace_back([&func, &range] {func(Range{ *(++range), range.end(), range.step }); });
-        for (auto& thread : threads)
-            thread.join();
-        return;
-    }
-    else
-    {
-        std::vector<result_type> results;
-        results.reserve(threadNum);
-        for (auto i = 0; i < threadNum; ++i)
-        {
-            threads.emplace_back([&func, &range, perThread, &results] { results.emplace_back(std::forward<result_type>(func(Range{ *range, *(range += perThread), range.step }))); });
-        }
-        //the last thread
-        threads.emplace_back([&func, &range, &results] {results.emplace_back(std::forward<result_type>(func(Range{ *range, range.end(), range.step }))); });
-        for (auto& thread : threads)
-            thread.join();
-        return results;
-    }
+    //for the first (threadNum-1) threads
+    for (auto i = 0; i < threadNum - 1; ++i)
+        threads.emplace_back([&func, &range, perThread] { func(Range{ *range, *(range += perThread), range.step }); });
+    //the last thread
+    threads.emplace_back([&func, &range] {func(Range{ *(++range), range.end(), range.step }); });
+    for (auto& thread : threads)
+        thread.join();
+
+}
+
+
+template<typename RangeType, typename Func>
+auto parallel(RangeType range, Func&& func, unsigned threadCount = std::thread::hardware_concurrency())
+->std::enable_if_t<!std::is_same_v<std::invoke_result_t<std::remove_reference_t<Func>, RangeType>, void>>
+{
+    const auto steps = range.steps();
+    const auto threadNum = std::min<std::common_type_t<decltype(steps), decltype(threadCount)>>(steps, threadCount);
+    const auto perThread = steps / threadNum;
+    std::vector<std::thread> threads;
+    threads.reserve(threadNum);
+
+    using result_type = std::invoke_result_t<std::remove_reference_t<Func>, RangeType>;
+    std::vector<result_type> results;
+    results.reserve(threadNum);
+    for (auto i = 0; i < threadNum; ++i)
+        threads.emplace_back([&func, &range, perThread, &results] { results.emplace_back(std::forward<result_type>(func(Range{ *range, *(range += perThread), range.step }))); });
+    //the last thread
+    threads.emplace_back([&func, &range, &results] {results.emplace_back(std::forward<result_type>(func(Range{ *range, range.end(), range.step }))); });
+    for (auto& thread : threads)
+        thread.join();
+    return results;
 }
