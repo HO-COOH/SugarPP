@@ -34,7 +34,7 @@ class MultiRange
         }
     }
 public:
-    MultiRange(Ranges...ranges) :ranges{ ranges... }, startValues{ranges.current ...} {}
+    MultiRange(Ranges...ranges) :ranges{ ranges... }, startValues{ ranges.current ... } {}
     MultiRange(std::tuple<Ranges...> ranges) :ranges{ ranges }, startValues{ ranges.current ... } {}
 
     auto begin()
@@ -50,10 +50,10 @@ public:
         incRange();
         return *this;
     }
-    //bool operator!=(MultiRange const& rhs) const
-    //{
-    //    return std::get<0>(ranges) != std::get<0>(rhs.ranges);
-    //}
+    bool operator!=(MultiRange const& rhs) const
+    {
+        return std::get<0>(ranges) != std::get<0>(rhs.ranges);
+    }
     template<typename EndValueTuple>
     bool operator!=(EndValueTuple const& rhs)
     {
@@ -83,7 +83,7 @@ public:
     Range(T start, T end, T2 step = 1) : current(static_cast<T3>(start)), max(static_cast<T3>(end)), step(step) {}
     auto operator*() const { return current; }
     auto begin() { return *this; }
-    auto end() { return max; }
+    auto end() const { return max; }
     auto steps() const { return (max - current) / step + 1; }
     bool operator!=(Range rhs) const
     {

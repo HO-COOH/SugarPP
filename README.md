@@ -12,10 +12,16 @@ A collection of my syntactic 🍬 when programming in C++. **When can we have ni
     - [Introduction](#introduction-1)
     - [Usage](#usage-1)
     - [Example](#example-1)
+    - [Documentation](#documentation)
   - [Range](#range)
     - [Introduction](#introduction-2)
     - [Example](#example-2)
     - [Usage](#usage-2)
+    - [Documentation](#documentation-1)
+      - [Type](#type)
+      - [Constructor](#constructor)
+      - [Public Member functions](#public-member-functions)
+      - [Non Member functions](#non-member-functions)
 
 
 ## Kotlin ``when`` C++ port
@@ -163,6 +169,68 @@ int main()
     print("Today is", date, ", ", day);
 }
 ```
+### Documentation
+<details>
+<summary>Input</summary>
+
+```cpp
+template<typename T>
+[[nodiscard]]T input(const char* prompt = nullptr, bool retry = true);  //1
+template<typename T>
+[[nodiscard]]T input(const std::string& prompt, bool retry = true);     //2
+template<typename T>
+[[nodiscard]]T input(std::string_view prompt, bool retry = true);       //3
+
+template<>
+[[nodiscard]]std::string input(const char* prompt, bool retry = true);  //4
+template<>
+[[nodiscard]]std::string input(const std::string& prompt, bool retry);  //5
+template<>
+[[nodiscard]]std::string input(std::string_view prompt, bool retry);    //6
+```
+- 1-3 First print a message ``prompt``, then get input from ``std::cin`` as if calling ``std::cin >> object;`` Returns the object of type ``T``. If the operation is failing, it clears the error state of ``std::cin`` and returns either a default constructed object of type ``T`` or retry the whole process if ``retry`` flag is ``true``.
+- 4-6 First print a message ``prompt``, then get input from ``std::cin`` as if calling ``std::getline``. Returns the input string. If the string is empty and ``retry`` flag is ``true``, it retry the whole process.
+</details>
+
+<details>
+<summary>Output</summary>
+
+```cpp
+template <char delim = ' ', std::ostream& os = std::cout, typename... Args>
+void print(Args &&... args);    //1
+template <std::ostream& os = std::cout, typename... Args>
+void printLn(Args &&... args);  //2
+```
+1. Print any number of objects specified by the parameter pack ``args`` as if calling ``std::cout << args;``, each followed by a ``delim``. Print a new line after the call.
+2. Equivalent to ``print<'\n'>(agrs...)``
+
+</details>
+
+<details>
+<summary>Thread Safe Output</summary>
+
+Thread-safe output functions are ``static`` functions inside ``ThreadSafe`` class.
+```cpp
+template<std::ostream& os = std::cout>
+struct ThreadSafe
+{
+    template<char delim=' ', typename...Args>
+    static inline void print(Args&& ...args);       //1
+
+    template<char delim = ' ', typename...Args>
+    static inline void tryPrint(Args&& ...args);    //2
+
+    template<typename... Args>
+    static inline void printLn(Args&&... args);     //3
+
+    template<typename... Args>
+    static inline void tryPrintLn(Args&&... args);  //4
+};
+```
+- 1,3 is the thread-safe version of `print` and ``printLn``, it blocks the current thread until it is able to print.
+- 2,4 will try to lock the internal mutex and print. If the mutex is currently locked, it immediately returns without blocking.
+
+</details>
 
 ## Range
 Simplify your ``for`` loop and everything you want from a numerical range.
@@ -257,3 +325,107 @@ int main()
 ```
 ### Usage
 Just include `./Range/Range.hpp` for ``Range`` and ``./Enumerate/Enumerate.hpp`` for ``Enumerate``
+### Documentation
+
+<details>
+<summary>Range</summary>
+
+#### Type
+```cpp
+class RangeRandomEngineBase
+{
+protected:
+    static inline std::mt19937 rdEngine{ std::random_device{}() };
+};
+template <typename T, typename StepType, typename ValueType = std::common_type_t<T, StepType>)
+class Range : RangeRandomEngineBase
+{   
+    /*...*/
+public:
+    using value_type = ValueType;
+    /*...*/
+}
+```
+
+#### Constructor
+```cpp
+template<typename T, typename StepType>
+Range(T start, T end, StepType step);
+```
+Construct a ``Range`` class representing [start, end). When incremented, the ``current`` value is incremented with ``step``. Note: **according to deduction rules, ``start`` and ``end`` must have the same type.**
+
+#### Public Member functions
+```cpp 
+value_type operator*() const;
+```
+Returns the ``current`` value.
+
+```cpp
+Range<T, StepType, ValueType> begin();
+```
+Returns ``*this`` unchanged.
+
+```cpp
+value_type end();
+```
+Returns the ``end`` value.
+
+```cpp
+auto steps() const;
+```
+Returns the number of ramaining steps to go in the current ``Range``.
+
+```cpp
+bool operator!=(Range rhs) const;           //1
+bool operator!=(value_type value) const;    //2
+```
+1. Returns ``this->current`` =?= ``rhs.current``
+2. Returns ``this->current`` =?= ``value``
+
+```cpp
+template<typename Num, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
+bool operator==(Num number) const; 
+```
+Returns whether ``this->current``<=``number``<=``this->end``, only instantiated when ``number`` is a number type.
+
+
+```cpp
+Range& operator++();                //1
+Range& operator+=(unsigned steps);  //2
+```
+1. increment ``*this``
+2. increment ``*this`` ``steps`` times
+
+```cpp
+value_type rand();                                      //1
+template<typename Container>
+void fillRand(Container& container);                    //2
+template<typename Container>
+void fillRand(Container& container, size_t count);      //3
+template<typename InputIt>
+void fillRand(InputIt begin, InputIt end);              //4
+
+value_type randFast() const;                            //5
+template<typename Container>
+void fillRandFast(Container& container);                //6
+template<typename Container>
+void fillRandFast(Container& container, size_t count);  //7
+template<typename InputIt>
+void fillRandFast(InputIt begin, InputIt end);          //8
+```
+- 1-4 uses ``std::uniform_<T>_distribution`` where ``T`` is some numeric types depending on ``value_type``
+  1. Returns a single random number within [current, end)
+  2. Fill ``container`` with random numbers within [current, end)
+  3. Fill ``container`` with ``count`` random numbers within [current, end), equivalent to:
+        ```cpp
+        fillRand(std::begin(container), std::begin(container) + count)
+        ```
+  4. Fill the range pointed by the iterators [begin, end) with random numbers within [current, end)
+- 5-8 uses ``rand()`` from ``<stdlib>``, which have the same usage as 1-4
+
+#### Non Member functions
+```cpp
+friend std::ostream& operator<<(std::ostream& os, Range const& range);
+```
+Print range in the format of: ``[current,end]``
+</details>

@@ -80,6 +80,12 @@ T input(std::string const& prompt, bool retry = true)
     return input<T>(prompt.c_str(), retry);
 }
 
+template<>
+[[nodiscard]]std::string input(std::string const& prompt, bool retry)
+{
+    return input<std::string>(prompt.c_str(), retry);
+}
+
 #if __cplusplus >= 201703L
 #include <string_view>
 template<typename T>
@@ -102,6 +108,48 @@ void printLn(Args &&... args)
 {
     ((os << args << '\n'), ...);
 }
+
+#include <mutex>
+/*Thread-safe IO*/
+template<std::ostream& os = std::cout>
+struct ThreadSafe
+{
+    static std::mutex m;
+
+    template<char delim=' ', typename...Args>
+    static inline void print(Args&& ...args)
+    {
+        std::lock_guard lock{ m };
+        ((os << args << delim), ...);
+        os << '\n';
+    }
+
+    template<char delim = ' ', typename...Args>
+    static inline void tryPrint(Args&& ...args)
+    {
+        std::unique_lock const lock{m, std::try_to_lock_t{}};
+        if (lock)
+        {
+            ((os << args << delim), ...);
+            os << '\n';
+        }
+    }
+
+    template<typename... Args>
+    static inline void printLn(Args&&... args)
+    {
+        std::lock_guard lock{ m };
+        ((os << args << '\n'), ...);
+    }
+
+    template<typename... Args>
+    static inline void tryPrintLn(Args&&... args)
+    {
+        std::unique_lock const lock{ m, std::try_to_lock_t{} };
+        if (lock)
+            ((os << args << '\n'), ...);
+    }
+};
 
 #include <fstream>
 template<typename Char=char>
