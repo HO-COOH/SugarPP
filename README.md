@@ -7,17 +7,18 @@ A collection of my syntactic 🍬 when programming in C++. **When can we have ni
     - [Requirement](#requirement)
     - [Example](#example)
     - [Advanced Usage](#advanced-usage)
+    - [Documentation](#documentation)
     - [To-DO](#to-do)
   - [IO](#io)
     - [Introduction](#introduction-1)
     - [Usage](#usage-1)
     - [Example](#example-1)
-    - [Documentation](#documentation)
+    - [Documentation](#documentation-1)
   - [Range](#range)
     - [Introduction](#introduction-2)
     - [Example](#example-2)
     - [Usage](#usage-2)
-    - [Documentation](#documentation-1)
+    - [Documentation](#documentation-2)
       - [Type](#type)
       - [Constructor](#constructor)
       - [Public Member functions](#public-member-functions)
@@ -30,6 +31,7 @@ A header only port of ``when`` statement/expression in kotlin.
 In [the official kotlin language tutorial](https://kotlinlang.org/docs/reference/basic-syntaxhtml#using-when-expression), the ``when`` expression is a pretty nice syntax sugar forreplacing traditional ``switch case`` statement seens in most languages. The drawback for``switch`` at least in C/C++ though is that it only supports matching **integer** values. Butthe kotlin's ``when`` basically supports these operations:
 - value matching (for all comparable type)
 ```kotlin
+/*kotlin*/
 when (x) {
     1 -> print("x == 1")
     2 -> print("x == 2")
@@ -38,8 +40,19 @@ when (x) {
     }
 }
 ```
+```cpp
+/*SugarPP*/
+when(x,
+    1, std::function{[]{ puts("x == 1"); }},
+    2, std::function{[]{ puts("x == 2"); }},
+    Else(), std::function{
+        []{ puts("x is neither 1 nor 2"); }
+    }
+);
+```
 - type matching
 ```kotlin
+/*kotlin*/
 fun describe(obj: Any): String =
     when (obj) {
         1          -> "One"
@@ -49,16 +62,41 @@ fun describe(obj: Any): String =
         else       -> "Unknown"
     }
 ```
+```cpp
+/*SugarPP*/
+auto describe = [](auto&& obj) {
+    return when(obj,
+        1,                      "One",
+        "hello",                "Greeting",
+        is<long>(),             "long",
+        is_not<const char*>(),  "Not a string",
+        Else(),                 "Unknown string"
+    );
+};
+```
 - range matching
 ```kotlin
+/*kotlin*/
 when (x) {
-    in 1..10 -> print("x is in the range")
-    in validNumbers -> print("x is valid")
-    !in 10..20 -> print("x is outside the range")
-    else -> print("none of the above")
+    in 1..10 ->         print("x is in the range")
+    in validNumbers ->  print("x is valid")
+    !in 10..20 ->       print("x is outside the range")
+    else ->             print("none of the above")
 }
 ```
-This project tries to mock kotlin's ``when`` in C++. It may sounds stupid, but it shows howpowerful ``template`` can be, yet I only used a small portition of its power.
+
+```cpp
+/*SugarPP*/
+#include "../Range/In.hpp"
+std::array validNumbers{11,13,17,19};
+when(x,
+    Range(1, 10),       std::function{[]{ puts("x is in the range"); }},
+    in{validNumbers},   std::function{[]{ puts("x is valid"); }},
+    NOT{Range(10, 20)}, std::function{[]{ puts("x is outside the range"); }},
+    Else(),             std::function{[]{ puts("none of the above"); }}
+);
+```
+This project tries to mock kotlin's ``when`` in C++. It may sounds stupid, but it shows how powerful ``template`` can be, yet I only used a small portition of its power.
 ### Usage
 Just include the ``When/When.hpp`` header in your project.
 ### Requirement
@@ -76,13 +114,13 @@ using namespace std::literals;
 int main()
 {
     int x = 1;
-    when((x),
+    when(x,
         1,          std::function{ [] {puts("x==1"); } },
         2,          std::function{ [] {puts("x==2"); } },
         Else(),     std::function{ [] {puts("x is neither 1 nor 2"); } }
     )();//"x==1"
     int temperature = 10;
-    print(when((temperature),
+    print(when(temperature,
               Range(INT_MIN, 0),    "freezing",
               Range(1, 15),         "cold",
               Range(16, 20),        "cool",
@@ -92,7 +130,7 @@ int main()
     )); //"cold"
 
     auto describe = [](auto &&obj) {
-        return when((obj),
+        return when(obj,
                     1,                      "One"s,
                     "hello"s,               "Greeting"s,
                     is<long>(),             "long"s,
@@ -139,6 +177,50 @@ An example (also included in ``main.cpp``):
     print(describe(2));                   //"Not a string"
     print(describe("random string"s));    //"Unknown string"
 ```
+### Documentation
+
+<details>
+<summary>When</summary>
+
+```cpp
+/*Primary templates*/
+template <typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args>
+auto when(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&& case2, Args&&... args);    //1
+
+template <typename Return1Type, typename Case2Type, typename... Args>
+auto when(const char* Expr, const char* Case1, Return1Type&& return1, Case2Type&& case2, Args&&... args);   //2
+
+template <typename ExprType, typename is_type, typename Return1Type, typename Case2Type, typename... Args>
+auto when(ExprType&& expr, is<is_type>, Return1Type&& return1, Case2Type&& case2, Args... args);            //3
+
+template <typename ExprType, typename is_not_type, typename Return1Type, typename Case2Type, typename... Args>
+auto when(ExprType&& expr, is_not<is_not_type>, Return1Type&& return1, Case2Type&& case2, Args... args);    //4
+
+/*Ending templates*/
+template <typename ExprType, typename CaseType, typename ReturnType>
+auto when(ExprType&& expr, CaseType&& to_match, ReturnType&& ReturnResult);                                 //5
+
+template <typename ReturnType>
+auto when(const char* Expr, const char* Case, ReturnType&& ReturnResult);                                   //6
+
+template <typename ExprType, typename is_type, typename ReturnType>
+auto when(ExprType&&, is<is_type>, ReturnType&& ReturnResult);                                              //7
+
+template <typename ExprType, typename is_not_type, typename ReturnType>
+auto when(ExprType&&, is_not<is_not_type>, ReturnType&& ReturnResult);                                      //8
+
+template <typename ExprType, typename ReturnType>
+auto when(ExprType&&, Else, ReturnType&& ReturnResult);                                                     //9
+```
+- 1-4 are the primary recursive templates
+   2. Specialization for ``const char*`` of ``Expression`` to match, performing ``strcmp``
+   3. Specialization for ``is<Type>``, performing type query, as if checking ``std::is_same_v<std::remove_reference_t<ExprType>, Type>``
+   4. Specialization for ``is_not<Type>``, performing type query, as if checking ``!std::is_same_v<std::remove_reference_t<ExprType>, Type>``
+- 5-8 are the ending templates which functions similarly as 1-4
+- 9 handles the ``Else`` cases and returns ``ReturnResult`` if non of the previous cases are matched described in 1-8
+
+</details>
+
 ### To-DO
 - ~~Support for direct contrary operation (for example, ``!is<long>`` instead of``is_not<long>``).~~ √
 - Better lambda support in matching branches

@@ -1,6 +1,7 @@
 #include "Range.hpp"
 #include "../IO/IO.hpp"
 #include "Enumerate.hpp"
+#include "In.hpp"
 #include <iostream>
 #include <array>
 int main()
@@ -56,5 +57,9 @@ int main()
                     process(index);
             }
         );
+    }
+    {
+        std::array arr{ 1,2,3,4, 5,6 };
+        print(in{ arr } == 3);
     }
 }
