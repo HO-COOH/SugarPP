@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <type_traits>
 #include <random>
 #include <iostream>
@@ -6,6 +6,10 @@
 #include <variant>
 #include <array>
 
+
+/**
+ * @brief Shared random engine for all @ref Range
+ */
 class RangeRandomEngineBase
 {
 protected:
@@ -16,11 +20,44 @@ protected:
 template <typename T, typename T2 = int, typename T3 = std::conditional_t<std::is_integral_v<T>&& std::is_floating_point_v<T2>, T2, T>>
 class Range;
 
+/**
+ * @brief A multiple ranges wrapper which handles any number/type of Range objects which can be used in a range-based for loop
+ * @details
+ * A typical usage is
+ * ~~~~{.cpp}
+ *     for(auto [i, j] ： Range(0, 10) | Range(0, 100))
+ *     {
+ *         ...
+ *     }
+ * ~~~~
+ *
+ * A MultiRange object stores 2 things:
+ *
+ * 1. The Range objects it is constructed from
+ *
+ * 2. The starting values of these objects, so that they can be reset once they reached to their end values
+ * @tparam Ranges type of different ranges constructed 
+ */
 template<typename... Ranges>
 class MultiRange
 {
     std::tuple<Ranges...> ranges;
     std::tuple<typename Ranges::value_type...> startValues;
+
+
+    /**
+     * @brief A helper function to increment the stored ranges
+     * @details
+     * The ranges is incremented from the lowest index -> highest index.
+     *
+     * Once a range object reaches its end value, it is reset to the original begins and the next range object is incremented, as what you typically do in a nested for-loop.
+     *
+     * For example, suppose we have a @ref MultiRange constructed from Range(0,3) and Range(0,5), it will be incremented as:
+     *
+     * [0,0] [0,1] [0,2]...[0,4] [1,0] [1,1] [1,2]...[2,0]...[2,4], then stop and exit
+     *
+     * @tparam I Current "index" into the ranges tuple
+     */
     template<size_t I = std::tuple_size_v<decltype(ranges)>-1>
     void incRange()
     {
@@ -34,36 +71,75 @@ class MultiRange
         }
     }
 public:
+    /**
+     * @brief Construct a MultiRange object from any number and any type of Range objects 
+     */
     MultiRange(Ranges...ranges) :ranges{ ranges... }, startValues{ ranges.current ... } {}
+
+
+    /**
+     * @brief Construct a MultiRange object from a std::tuple of Range objects
+     */
     MultiRange(std::tuple<Ranges...> ranges) :ranges{ ranges }, startValues{ ranges.current ... } {}
 
+    /**
+     * @brief Return *this, unchanged
+     */
     auto begin()
     {
         return *this;
     }
+
+    /**
+     * @brief Return a std::tuple of all the end values of the ranges it was constructed
+     */
     auto end()
     {
         return std::apply([](auto&... ranges) { return std::make_tuple(ranges.end()...); }, ranges);
     }
+
+    /**
+     * @brief Increment *this
+     * @see incRange
+     */
     MultiRange& operator++()
     {
         incRange();
         return *this;
     }
+
+    /**
+     * @brief Compares whether two MultiRanges objects are equal
+     * @details
+     * Comparison is done by comparing the highest index Range object, as you typically do in the outer-most layer of a nested for loop
+     */
     bool operator!=(MultiRange const& rhs) const
     {
         return std::get<0>(ranges) != std::get<0>(rhs.ranges);
     }
+
+    /**
+     * @brief Compares whether the current values of Range objects in @a *this are the same as in @p rhs
+     * @param rhs Should be a std::tuple of end values
+     */
     template<typename EndValueTuple>
     bool operator!=(EndValueTuple const& rhs)
     {
         return std::get<0>(ranges) != std::get<0>(rhs);
     }
+
+    /**
+     * @brief Return a tuple of the current values in *this 
+     */
     auto operator*() const
     {
         return std::apply([](auto&... ranges) { return std::make_tuple(*ranges...); }, ranges);
     }
 
+    /**
+     * @brief An intuitive way to concat a Range object to a MultiRange object
+     * @param rhs Should be a Range type object
+     */
     template<typename Range>
     auto operator|(Range rhs)
     {
@@ -83,8 +159,8 @@ public:
     Range(T start, T end, T2 step = 1) : current(static_cast<T3>(start)), max(static_cast<T3>(end)), step(step) {}
     auto operator*() const { return current; }
     auto begin() { return *this; }
-    auto end() const { return max; }
-    auto steps() const { return (max - current) / step + 1; }
+    [[nodiscard]]auto end() const { return max; }
+    [[nodiscard]]auto steps() const { return (max - current) / step + 1; }
     bool operator!=(Range rhs) const
     {
         if constexpr (std::is_arithmetic_v<T3>)
@@ -261,7 +337,7 @@ auto parallel(RangeType range, Func&& func, unsigned threadCount = std::thread::
 
 
 template<typename RangeType, typename Func>
-auto parallel(RangeType range, Func&& func, unsigned threadCount = std::thread::hardware_concurrency())
+auto parallel(RangeType range, Func&& func, unsigned threadCount)
 ->std::enable_if_t<!std::is_same_v<std::invoke_result_t<std::remove_reference_t<Func>, RangeType>, void>>
 {
     const auto steps = range.steps();

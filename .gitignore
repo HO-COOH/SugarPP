@@ -1,3 +1,5 @@
 /out/*
 /.vs
 /*/out
+/html
+/latex

@@ -17,13 +17,6 @@ int main()
     )();//"x==1"
     /*Note: Must be wrapped into a callable object. Because different lambda has different type, therefore the return type is not the same */
 
-    int x2 = 1;
-    ////when((x),
-    //    1,  [] {puts("x==1"); },
-    //    2,  [] {puts("x==2"); },
-    //    Else(),  [] {puts("x is neither 1 nor 2"); }
-    //)();//"x==1"
-
     int temperature = 10;
     puts(when((temperature),
               Range(INT_MIN, 0),    "freezing",
