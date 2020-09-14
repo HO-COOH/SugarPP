@@ -59,7 +59,22 @@ int main()
         );
     }
     {
+        /*in<Container> still works*/
         std::array arr{ 1,2,3,4, 5,6 };
         print(in{ arr } == 3);
     }
+    {
+        print("Range works for lvalue container");
+        std::array arr{ 1,2,3,4, 5,6 };
+        print(Range{ arr } == 3);
+    }
+    {
+        print("Range works for lvalue container");
+        std::array arr{ 1,2,3,4, 5,6 };
+        print(3 == Range{ arr });
+    }
+    {
+        print(Range{ std::array{ 1,2,3,4, 5,6 } } == 3);
+    }
+
 }

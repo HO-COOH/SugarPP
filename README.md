@@ -91,7 +91,7 @@ when (x) {
 std::array validNumbers{11,13,17,19};
 when(x,
     Range(1, 10),       std::function{[]{ puts("x is in the range"); }},
-    in{validNumbers},   std::function{[]{ puts("x is valid"); }},
+    Range(validNumbers),std::function{[]{ puts("x is valid"); }},
     NOT{Range(10, 20)}, std::function{[]{ puts("x is outside the range"); }},
     Else(),             std::function{[]{ puts("none of the above"); }}
 );

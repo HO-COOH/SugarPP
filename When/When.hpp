@@ -135,6 +135,7 @@ public:
  */
 struct Else
 {
+    constexpr operator bool() const { return false; }
 };
 
 /**
