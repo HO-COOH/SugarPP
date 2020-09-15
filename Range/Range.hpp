@@ -237,6 +237,16 @@ public:
     [[nodiscard]]auto steps() const { return (max - current) / step + 1; }
 
     /**
+     * @brief Return the span of the range, that is `max-min`
+     */
+    [[nodiscard]] auto span() const { return max - current; }
+
+    /**
+     * @brief Return the next value of the current range object
+     */
+    [[nodiscard]] auto next() const { return static_cast<value_type>(current + step); }
+
+    /**
      * @brief Return whether the current value of `this` == `rhs`
      */
     bool operator!=(Range rhs) const
@@ -337,12 +347,12 @@ public:
      * @tparam Container Type of the container
      * @param container The container to be filled
      * @param count number of random numbers to be pushed back to the container
-     * @note The `container` needs to support `push_back()`, which is used by `std::back_inserter`
+     * @note The `container` needs to support `push_back()`, which is used by `std::back_inserter`, and `size()`
      */
     template<typename Container>
     void fillRand(Container& container, size_t count)
-    { 
-        std::generate_n(std::back_inserter(container), count, [ dist = getDistribution() ]() mutable
+    {
+        std::generate_n(container.size()>=count? std::begin(container): std::back_inserter(container), count, [ dist = getDistribution() ]() mutable
         {
             return dist(rdEngine);
         });
@@ -371,6 +381,18 @@ public:
     void fillRandFast(Container& container) const
     {
         std::generate(std::begin(container), std::end(container), [this] {return randFast(); });
+    }
+
+    /**
+     * @brief Same as `FillRand(container, count)` but uses C random functions
+     */
+    template<typename Container>
+    void fillRandFast(Container& container, size_t count)
+    {
+        std::generate_n(container.size() >= count ? std::begin(container) : std::back_inserter(container), count, [this]
+        {
+            return randFast();
+        });
     }
 
     /**

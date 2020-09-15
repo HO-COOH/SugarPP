@@ -9,15 +9,15 @@
  */
 inline void restore(std::istream& is)
 {
-    std::cin.clear();
-    while (std::cin.get() != '\n')
+    is.clear();
+    while (is.get() != '\n')
         ;
 }
 
 /**
  * @brief Get the correct type of value from `stdin`
  * @tparam T The expected return type
- * @param prompt A short prompt message printed on `stdout`, which will appear before user input 
+ * @param prompt A short prompt message printed on `stdout`, which will appear before user input
  * @param retry The flag for whether to retry the whole process when an input exception occurs, whether it's the type mismatch or invalid input
  * @return If retry flag is set to false and an exception does occurs, the function clears any invalid states, and return a default-constructed object of the expected type. Otherwise return the correct input.
  */
@@ -169,7 +169,7 @@ struct ThreadSafe
      * @brief Thread-safe version of print, blocks until the printing is finished.
      * @see ::print
      */
-    template<char delim=' ', typename...Args>
+    template<char delim = ' ', typename...Args>
     static inline void print(Args&& ...args)
     {
         std::lock_guard lock{ m };
@@ -183,7 +183,7 @@ struct ThreadSafe
     template<char delim = ' ', typename...Args>
     static inline void tryPrint(Args&& ...args)
     {
-        std::unique_lock const lock{m, std::try_to_lock_t{}};
+        std::unique_lock const lock{ m, std::try_to_lock_t{} };
         if (lock)
         {
             ((os << args << delim), ...);
@@ -214,7 +214,7 @@ struct ThreadSafe
 };
 
 #include <fstream>
-template<typename Char=char>
+template<typename Char = char>
 class FileIterator
 {
     std::ifstream fs;
@@ -234,11 +234,11 @@ public:
 #endif
     value_type operator*() const
     {
-        
+
     }
     FileIterator& operator++()
     {
-        
+
     }
 
 };
