@@ -932,8 +932,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = C:\Users\Peter\source\repos\SugarPP\README.md \
-                         C:\Users\Peter\source\repos\SugarPP\.vs \
+EXCLUDE                = C:\Users\Peter\source\repos\SugarPP\.vs \
                          C:\Users\Peter\source\repos\SugarPP\IO\out \
                          C:\Users\Peter\source\repos\SugarPP\Range\out \
                          C:\Users\Peter\source\repos\SugarPP\When\out

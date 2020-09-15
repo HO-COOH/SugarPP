@@ -113,7 +113,12 @@ public:
     /**
      * @brief Construct a MultiRange object from a std::tuple of Range objects
      */
-    MultiRange(std::tuple<Ranges...> ranges) :ranges{ ranges }, startValues{ ranges.current ... } {}
+    MultiRange(std::tuple<Ranges...> ranges) :ranges{ ranges }, startValues{ std::apply(
+		[](auto const&... ranges)
+		{
+			return std::make_tuple(ranges.current...);
+		}, ranges
+	) } {}
 
     /**
      * @brief Return *this, unchanged
@@ -432,7 +437,7 @@ class Range<void, void, void, Container, void>:public ContainerRangeBase<Range<v
 {
     Container& range;
 public:
-    Range(Container& container) :range(container) { std::cout << "Range&" << typeid(value_type).name() << '\n'; }
+    Range(Container& container) :range(container) {}
     Range(Container&& container) = delete;  //Another overload is necessary to handle the case when [container] is an rvalue, otherwise dangling reference
     friend ContainerRangeBase<Range<void, void, void, Container, void>, Container>;
 };
