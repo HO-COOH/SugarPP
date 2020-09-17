@@ -24,7 +24,8 @@ inline void restore(std::istream& is)
 template <typename T>
 [[nodiscard]] T input(const char* prompt = nullptr, bool retry = true)
 {
-    T i{};
+    using TargetType = std::remove_cv_t<T>;
+    TargetType i{};
     if (!retry)
     {
         if (prompt)
@@ -46,7 +47,7 @@ template <typename T>
                 //handles negative number and convert to its absolute value when expected an unsigned
                 if (std::cin.peek() == '-')
                 {
-                    std::make_signed_t<T> i_abs;
+                    std::make_signed_t<TargetType> i_abs;
                     std::cin >> i_abs;
                     if (!std::cin)
                         continue;
@@ -87,7 +88,6 @@ template <>
             std::getline(std::cin, s);
         } while (s.empty());
     }
-    restore(std::cin);
     return s;
 }
 

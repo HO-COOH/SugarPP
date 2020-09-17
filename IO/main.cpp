@@ -19,15 +19,19 @@ void test()
 
 int main()
 {
-    test<int>();
-    test<unsigned>();
-    test<char>();
-    test<double>();
-    test<float>();
-    test<std::string>();
-    test<long long>();
-    test<unsigned long long>();
+    //test<int>();
+    //test<unsigned>();
+    //test<char>();
+    //test<double>();
+    //test<float>();
+    //test<std::string>();
+    //test<long long>();
+    //test<unsigned long long>();
 
 
-    print("hello", "world");
+    print("Hello, what's your name?");
+    auto name = input<std::string>("Enter your name: ");
+    print("Hello,", name, "How old are you?");
+    auto age = input<int>("Enter your age: ");
+    print("Thanks for the data,", name, "who is", age, "years old");
 }
