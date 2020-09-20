@@ -188,14 +188,14 @@ namespace detail
                 {
                     ((os << args << delim), ...);
                 }, arg);
-            os << ')';
+            os << '\b' << ')';
         }
         else if constexpr (iterable<T>::value)
         {
             os << '[';
             for (auto& element : arg)
                 os << element << delim;
-            os << ']';
+            os << '\b' << ']';
         }
         else
             os << '?';

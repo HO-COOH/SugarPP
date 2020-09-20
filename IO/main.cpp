@@ -38,10 +38,10 @@ int main()
     print("Thanks you,", name, "who is", age, "years old");
 
     /*print any iterable*/
-    std::array const arr{ 1,2,3 };
+    std::array arr{ 1,2,3 };
     print(arr);
 
     /*print a tuple*/
-    std::tuple const t{ "SugarPP", 123, 45.6f };
+    std::tuple t{ "SugarPP", 123, 45.6f };
     print(t);
 }
