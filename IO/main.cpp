@@ -1,4 +1,6 @@
 #include "IO.hpp"
+#include <array>
+#include <tuple>
 void printSeparator()
 {
     std::cout << "----------------------------------";
@@ -33,5 +35,13 @@ int main()
     auto name = input<std::string>("Enter your name: ");
     print("Hello,", name, "How old are you?");
     auto age = input<int>("Enter your age: ");
-    print("Thanks for the data,", name, "who is", age, "years old");
+    print("Thanks you,", name, "who is", age, "years old");
+
+    /*print any iterable*/
+    std::array const arr{ 1,2,3 };
+    print(arr);
+
+    /*print a tuple*/
+    std::tuple const t{ "SugarPP", 123, 45.6f };
+    print(t);
 }

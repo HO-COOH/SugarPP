@@ -1,4 +1,13 @@
-﻿#pragma once
+﻿/*****************************************************************//**
+ * \file   Range.hpp
+ * \brief  Numeric ranges/multi-range
+ * 
+ * \author Peter
+ * \date   September 2020
+ * \note Not to be confused with C++20's ranges
+ *********************************************************************/
+
+#pragma once
 #include <type_traits>
 #include <random>
 #include <iostream>
@@ -319,6 +328,23 @@ public:
     [[nodiscard]] auto rand() const
     {
         return getDistribution()(rdEngine);
+    }
+
+    /**
+     * @brief Return a correct type of several random numbers within the range
+     * @tparam N Compile time constant
+     * @note
+     * Intended usage is with C++17 structured binding, so that you can define multiple random numbers with one line.
+     * ~~~~{.cpp}
+     * auto [num1, num2, num3]=Range(0, 100).rand<3>();
+     * ~~~~
+     */
+    template<size_t N>
+    [[nodiscard]] auto rand() const
+    {
+        std::array<value_type, N> values;
+        std::generate(values.begin(), values.end(), [dist = getDistribution()]{ return dist(rdEngine); });
+        return values;
     }
 
     /**

@@ -11,9 +11,13 @@ int main()
         for (auto i : Range(0, 10))
             std::cout << i << '\n';
 
-        /*use range for a random number*/
+        /*use range to generate 1 random number*/
         Range r(-1, 100000);
         std::cout << "Random number in " << r << " is " << r.rand() << '\n';
+
+        /*use range to generate several random numbers*/
+        auto [num1, num2, num3] = Range(1, 10).rand<3>();
+
 
         /*use range to fill a C style array*/
         double arr[10];

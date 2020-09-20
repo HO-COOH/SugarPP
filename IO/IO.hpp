@@ -1,3 +1,11 @@
+/*****************************************************************//**
+ * \file   IO.hpp
+ * \brief  Convenient functions for using std::cin/cout
+ * 
+ * \author Peter
+ * \date   September 2020
+ *********************************************************************/
+
 #pragma once
 
 #include <iostream>
@@ -64,6 +72,7 @@ template <typename T>
 
 /**
  * @brief Specialization for `std::string`, which uses `std::getline` internally.
+ * @note When the string is empty it will be counted as failure and will trigger a retry if it is enabled
  * @see input
  */
 template <>
@@ -132,6 +141,66 @@ inline std::string input(std::string_view prompt, bool retry = true)
 }
 #endif
 
+namespace detail
+{
+
+    template<typename T>
+    struct is_tuple_impl : std::false_type {};
+
+    template<typename... Ts>
+    struct is_tuple_impl<std::tuple<Ts...>> : std::true_type {};
+
+    template<typename T>
+    struct is_tuple : is_tuple_impl<std::decay_t<T>> {};
+
+    template<typename T, typename = void>
+    struct iterable_impl :std::false_type {};
+
+    template<typename T>
+    struct iterable_impl<T, decltype(std::begin(std::declval<T>()), void())>:std::true_type{};  //still works even when T is const
+
+    template<typename T>
+    struct iterable:iterable_impl
+    <
+        std::conditional_t
+        <
+            std::is_array_v<T>,
+            T,
+            std::decay_t<T>
+        >
+    >{};
+
+    template<typename T, std::ostream& os = std::cout, typename = void>
+    struct printable:std::false_type{};
+
+    template<typename T, std::ostream& os>
+    struct printable<T, os, decltype(os << std::declval<T>(), void())>:std::true_type{};
+
+    template<char delim = ' ', std::ostream& os = std::cout, typename T>
+    void print_impl(T&& arg)
+    {
+        if constexpr (printable<T>::value)
+            os << arg;
+        else if constexpr (is_tuple<T>::value)
+        {
+            os << '(';
+            std::apply([](auto&&... args)
+                {
+                    ((os << args << delim), ...);
+                }, arg);
+            os << ')';
+        }
+        else if constexpr (iterable<T>::value)
+        {
+            os << '[';
+            for (auto& element : arg)
+                os << element << delim;
+            os << ']';
+        }
+        else
+            os << '?';
+    }
+}
 
 /**
  * @brief Print any number of arguments to `stdout`, separated by `delim`
@@ -140,18 +209,18 @@ inline std::string input(std::string_view prompt, bool retry = true)
 template <char delim = ' ', std::ostream& os = std::cout, typename... Args>
 void print(Args &&... args)
 {
-    ((os << args << delim), ...);
+    ((detail::print_impl<delim, os>(args), os << delim), ...);
     os << '\n';
 }
 
 /**
- * @brief Print any number of arguments to `stdout`, separated by a line, same as `print<'\n>`
+ * @brief Print any number of arguments to `stdout`, separated by a line, same as `print<'\n'>`
  * @see print
  */
 template <std::ostream& os = std::cout, typename... Args>
 void printLn(Args &&... args)
 {
-    ((os << args << '\n'), ...);
+    ((detail::print_impl<' ', os>(args), os << '\n'), ...);
 }
 
 #include <mutex>

@@ -226,16 +226,19 @@ auto when(ExprType&&, Else, ReturnType&& ReturnResult);                         
 - Better lambda support in matching branches
 
 ## IO
-A convenient helper function for substitute ``std::cin`` that just **works as you intended.** No more ``getchar()`` for *eating* the enter key nonsense! Let ``print() / printLn()`` helps to eliminate ugly ``::`` and ``<<``
+A convenient helper function for substitute ``std::cin`` that just **works as you intended.** No more ``getchar()`` for *eating* the enter key nonsense! And ``print`` anything!
 ### Introduction
 The ``input`` template function is similar to ``python``. It prints a ``prompt`` message and does the following things with error handling, which means clearing any bad bit and ignores the rest of the input and can be specify to ``retry`` until the user entered the right thing. (**default is retry enabled**)
 - If the type is a primitive, it works the same as ``std::cin >>``
     + If the type is ``unsigned`` number type, and it receives a negative number, it converts to the absolute value
 - If the type is ``std::string``, it works the same as ``std::getline``
 
-The ``print()`` function template prints **ANY** number of arguments, separated by a template argument ``delim`` (default to a space).
+The ``print()`` function template prints **ANY** number of arguments, separated by a template argument ``delim`` (default to a space). And it's able to print almost anything:
+- anything that ``std::cout`` has an overload
+- anything that is iterable, eg. has a ``.begin()`` function, and can be printed after dereference that iterator 
+- ``std::tuple``/``std::pair``
 
-The ``printLn()`` function template prints **ANY** number of arguments, one line at a time.
+Just like ``print()``, ``printLn()`` function template prints **ANY** number of arguments, one line at a time.
 ### Usage
 Just include `./IO/IO.hpp`.
 ### Example
@@ -244,11 +247,11 @@ A more detailed example is in ``./IO/main.cpp``
 #include "IO.hpp"
 int main()
 {
-    auto date = input<int>("Today's data: ");
-    auto day = input<std::string>("What day is today? ");
-    auto someChar = input<char>("Enter a character: ", false);  //retry disabled
-
-    print("Today is", date, ", ", day);
+    print("Hello, what's your name?");
+    auto name = input<std::string>("Enter your name: ");
+    print("Hello,", name, "How old are you?");
+    auto age = input<int>("Enter your age: ");
+    print("Thanks you,", name, "who is", age, "years old");
 }
 ```
 ### Documentation
@@ -346,6 +349,9 @@ int main()
     /*use range for a random number*/
     Range r(-1, 100000);
     print("Random number in ", r, " is ", r.rand());
+
+    /*use range to generate several random numbers*/
+    auto [num1, num2, num3] = Range(1, 10).rand<3>();
 
     /*use range to fill a C style array*/
     double arr[10];

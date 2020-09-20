@@ -1,9 +1,24 @@
+/*****************************************************************//**
+ * \file   When.hpp
+ * \brief  Kotlin's when statement port
+ * 
+ * \author Peter
+ * \date   September 2020
+ *********************************************************************/
+
 #pragma once
 #include <type_traits>
 #include <utility>
 #include <cstring>  //for strcmp()
 #include <utility>
+#include "../Range/Range.hpp"
 
+
+/**
+ * @brief Type traits for determining whether two types can be compared with an equal operator
+ * @tparam lhsType Type of Left-hand-side
+ * @tparam rhsType Type of Right-hand-side
+ */
 template <typename lhsType, typename rhsType, typename = void>
 struct comparable : std::false_type
 {
@@ -35,6 +50,11 @@ public:
         return expr != caseExpr;
     }
 };
+template<typename Expr, typename NotType, typename = std::enable_if_t<comparable<Expr, NotType>::value>>
+bool operator==(Expr&& expr, NOT<NotType>&& notCase)
+{
+    return notCase == expr;
+}
 
 /**
  * @brief A dummy struct for logic AND
@@ -53,12 +73,12 @@ public:
         return (caseExpr1 == expr) && (caseExpr2 == expr);
     }
 
-    template<typename Expr, typename Case1, typename Case2, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
-    friend bool operator==(Expr&& expr, AND<Case1, Case2>&& andCase)
-    {
-        return andCase == expr;
-    }
 };
+template<typename Expr, typename Case1, typename Case2, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
+bool operator==(Expr&& expr, AND<Case1, Case2>&& andCase)
+{
+    return andCase == expr;
+}
 
 /**
  * @brief A dummy struct for logic OR
@@ -76,58 +96,12 @@ public:
     {
         return (caseExpr1 == expr) || (caseExpr2 == expr);
     }
-
-    template<typename Expr, typename Case1, typename Case2, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
-    friend bool operator==(Expr&& expr, OR<Case1, Case2>&& orCase)
-    {
-        return orCase == expr;
-    }
 };
-
-
-/*For range matching */
-template <typename T, typename T2 = int, typename T3 = typename std::conditional<std::is_integral<T>::value&& std::is_floating_point<T2>::value, double, int>::type>
-class Range
+template<typename Expr, typename Case1, typename Case2, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
+bool operator==(Expr&& expr, OR<Case1, Case2>&& orCase)
 {
-    T3 start;
-    T3 current;
-    T3 end_v;
-    const T2 step;
-
-public:
-    explicit Range(T start, T end, T2 step = 1) : start(static_cast<T3>(start)), current(static_cast<T3>(start)), end_v(static_cast<T3>(end)), step(step) {}
-    class RangeIterator
-    {
-        T3* ptr;
-        const T2& step;
-
-    public:
-        RangeIterator(T3* ptr, const T2& step) : ptr(ptr), step(step) {}
-        RangeIterator& operator++()
-        {
-            (*ptr) += step;
-            return *this;
-        }
-        T3 operator*() { return (*ptr); }
-        bool operator!=(const RangeIterator& iter) { return abs((*ptr)) <= abs(*(iter.ptr)); }
-    };
-    auto begin() { return RangeIterator(&current, step); }
-    auto end() { return RangeIterator(&end_v, step); }
-    
-    /*Added from my [HavingFun] repo to support range matching*/
-    template <typename Num, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
-    friend bool operator==(Num number, Range const& rhs)
-    {
-        return number >= rhs.start && number <= rhs.end_v ? true : false;
-    }
-
-    template<typename Num,typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
-    bool operator==(Num number) const
-    {
-        return number == (*this);
-    }
-};
-
+    return orCase == expr;
+}
 /**********************************************************************/
 
 /**
