@@ -43,11 +43,9 @@ when (x) {
 ```cpp
 /*SugarPP*/
 when(x,
-    1, std::function{[]{ puts("x == 1"); }},
-    2, std::function{[]{ puts("x == 2"); }},
-    Else(), std::function{
-        []{ puts("x is neither 1 nor 2"); }
-    }
+    1, []{ puts("x == 1"); },
+    2, []{ puts("x == 2"); },
+    Else(), []{ puts("x is neither 1 nor 2"); }
 );
 ```
 - type matching
@@ -90,10 +88,10 @@ when (x) {
 #include "../Range/In.hpp"
 std::array validNumbers{11,13,17,19};
 when(x,
-    Range(1, 10),       std::function{[]{ puts("x is in the range"); }},
-    Range(validNumbers),std::function{[]{ puts("x is valid"); }},
-    NOT{Range(10, 20)}, std::function{[]{ puts("x is outside the range"); }},
-    Else(),             std::function{[]{ puts("none of the above"); }}
+    Range(1, 10),       []{ puts("x is in the range"); },
+    Range(validNumbers),[]{ puts("x is valid"); },
+    NOT{Range(10, 20)}, []{ puts("x is outside the range"); },
+    Else(),             []{ puts("none of the above"); }
 );
 ```
 This project tries to mock kotlin's ``when`` in C++. It may sounds stupid, but it shows how powerful ``template`` can be, yet I only used a small portition of its power.
@@ -115,9 +113,9 @@ int main()
 {
     int x = 1;
     when(x,
-        1,          std::function{ [] {puts("x==1"); } },
-        2,          std::function{ [] {puts("x==2"); } },
-        Else(),     std::function{ [] {puts("x is neither 1 nor 2"); } }
+        1,          [] {puts("x==1"); },
+        2,          [] {puts("x==2"); },
+        Else(),     [] {puts("x is neither 1 nor 2"); }
     )();//"x==1"
     int temperature = 10;
     print(when(temperature,
@@ -223,7 +221,7 @@ auto when(ExprType&&, Else, ReturnType&& ReturnResult);                         
 
 ### To-DO
 - ~~Support for direct contrary operation (for example, ``!is<long>`` instead of``is_not<long>``).~~ √
-- Better lambda support in matching branches
+- ~~Better lambda support in matching branches~~ √
 
 ## IO
 A convenient helper function for substitute ``std::cin`` that just **works as you intended.** No more ``getchar()`` for *eating* the enter key nonsense! And ``print`` anything!
