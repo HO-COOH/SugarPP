@@ -190,12 +190,26 @@ namespace detail
                 }, arg);
             os << '\b' << ')';
         }
-        else if constexpr (iterable<T>::value)
+        else if constexpr (iterable<T>::value && printable<typename std::remove_reference_t<T>::value_type>::value)
+        {
+            os << '[';
+            bool printed = false;
+            for (auto& element : arg)
+            {
+                os << element << delim;
+                printed = true;
+            }
+            if (printed)
+                os << '\b' << ']';
+            else
+                os << ']';
+        }
+        else if constexpr (iterable<typename std::remove_reference_t<T>::value_type>::value)
         {
             os << '[';
             for (auto& element : arg)
-                os << element << delim;
-            os << '\b' << ']';
+                print_impl(element);
+            os << ']';
         }
         else
             os << '?';

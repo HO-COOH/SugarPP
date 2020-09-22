@@ -234,6 +234,7 @@ The ``input`` template function is similar to ``python``. It prints a ``prompt``
 The ``print()`` function template prints **ANY** number of arguments, separated by a template argument ``delim`` (default to a space). And it's able to print almost anything:
 - anything that ``std::cout`` has an overload
 - anything that is iterable, eg. has a ``.begin()`` function, and can be printed after dereference that iterator 
+- anything that is a nested iterable(at any depth)
 - ``std::tuple``/``std::pair``
 
 Just like ``print()``, ``printLn()`` function template prints **ANY** number of arguments, one line at a time.
@@ -250,6 +251,19 @@ int main()
     print("Hello,", name, "How old are you?");
     auto age = input<int>("Enter your age: ");
     print("Thanks you,", name, "who is", age, "years old");
+
+    /*print any iterable*/
+    std::array arr{ 1,2,3 };
+    print(arr);//[1, 2, 3]
+
+    /*print a tuple*/
+    std::tuple t{ "SugarPP", 123, 45.6f };
+    print(t);//(SugarPP, 123, 45.6)
+
+    /*print any nested printable*/
+    std::vector<std::vector<int>> v1{ {1,2,3}, {5,6,7,8}, {9,10} };
+    std::vector<std::vector<std::vector<int>>> v2{ {{1,2,3}, {5,6,7,8}, {9,10}}, {{10,11},{12,13}, {}} };
+    printLn(v1, v2);//[[1, 2, 3], [5, 6, 7, 8], [9, 10]]...
 }
 ```
 ### Documentation
