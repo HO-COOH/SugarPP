@@ -135,7 +135,7 @@ T input(std::string_view prompt, bool retry = true)
  * @brief Overload for `std::string_view` as prompt message and specialized for `std::string` as return type, if C++17 is available
  */
 template<>
-inline std::string input(std::string_view prompt, bool retry = true)
+inline std::string input(std::string_view prompt, bool retry)
 {
     return input<std::string>(prompt.data(), retry);
 }
@@ -232,7 +232,7 @@ void printLn(Args &&... args)
 template<std::ostream& os = std::cout>
 struct ThreadSafe
 {
-    static std::mutex m;
+    static inline std::mutex m;
 
     /**
      * @brief Thread-safe version of print, blocks until the printing is finished.
@@ -242,8 +242,9 @@ struct ThreadSafe
     static inline void print(Args&& ...args)
     {
         std::lock_guard lock{ m };
-        ((os << args << delim), ...);
-        os << '\n';
+        //((os << args << delim), ...);
+        //os << '\n';
+        ::print<delim, os>(std::forward<Args>(args)...);
     }
 
     /**
@@ -255,8 +256,7 @@ struct ThreadSafe
         std::unique_lock const lock{ m, std::try_to_lock_t{} };
         if (lock)
         {
-            ((os << args << delim), ...);
-            os << '\n';
+            ::print<delim, os>(std::forward<Args>(args)...);
         }
     }
 
@@ -267,7 +267,7 @@ struct ThreadSafe
     static inline void printLn(Args&&... args)
     {
         std::lock_guard lock{ m };
-        ((os << args << '\n'), ...);
+        ::printLn<os>(std::forward<Args>(args)...);
     }
 
     /**
@@ -278,11 +278,12 @@ struct ThreadSafe
     {
         std::unique_lock const lock{ m, std::try_to_lock_t{} };
         if (lock)
-            ((os << args << '\n'), ...);
+            ::printLn<os>(std::forward<Args>(args)...);
     }
 };
 
 #include <fstream>
+#include <filesystem>
 template<typename Char = char>
 class FileIterator
 {

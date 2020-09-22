@@ -1,7 +1,7 @@
 ﻿/*****************************************************************//**
  * \file   Range.hpp
  * \brief  Numeric ranges/multi-range
- * 
+ *
  * \author Peter
  * \date   September 2020
  * \note Not to be confused with C++20's ranges
@@ -16,10 +16,10 @@
 #include <array>
 
 
-/**
- * @brief Shared random engine for all @ref Range
- * @details Stored a `static` protected `std::mt19937` member, which will be initialized at first use.
- */
+ /**
+  * @brief Shared random engine for all @ref Range
+  * @details Stored a `static` protected `std::mt19937` member, which will be initialized at first use.
+  */
 class RangeRandomEngineBase
 {
 protected:
@@ -59,8 +59,8 @@ template <typename T1,  //start
     typename T2,        //end
     typename T3 = int,
     typename ValueType = typename CommonValueType<T1, T2, void>::type,
-    typename StepType=std::common_type_t<ValueType, T3>>
-class Range;
+    typename StepType = std::common_type_t<ValueType, T3>>
+    class Range;
 
 /**
  * @brief A multiple ranges wrapper which handles any number/type of Range objects which can be used in a range-based for loop
@@ -78,7 +78,7 @@ class Range;
  * 1. The Range objects it is constructed from
  *
  * 2. The starting values of these objects, so that they can be reset once they reached to their end values
- * @tparam Ranges type of different ranges constructed 
+ * @tparam Ranges type of different ranges constructed
  */
 template<typename... Ranges>
 class MultiRange
@@ -114,7 +114,7 @@ class MultiRange
     }
 public:
     /**
-     * @brief Construct a MultiRange object from any number and any type of Range objects 
+     * @brief Construct a MultiRange object from any number and any type of Range objects
      */
     MultiRange(Ranges...ranges) :ranges{ ranges... }, startValues{ ranges.current ... } {}
 
@@ -123,75 +123,75 @@ public:
      * @brief Construct a MultiRange object from a std::tuple of Range objects
      */
     MultiRange(std::tuple<Ranges...> ranges) :ranges{ ranges }, startValues{ std::apply(
-		[](auto const&... ranges)
-		{
-			return std::make_tuple(ranges.current...);
-		}, ranges
-	) } {}
+        [](auto const&... ranges)
+        {
+            return std::make_tuple(ranges.current...);
+        }, ranges
+    ) } {}
 
-    /**
-     * @brief Return *this, unchanged
-     */
-    auto begin()
-    {
-        return *this;
-    }
+        /**
+         * @brief Return *this, unchanged
+         */
+        auto begin()
+        {
+            return *this;
+        }
 
-    /**
-     * @brief Return a std::tuple of all the end values of the ranges it was constructed
-     */
-    auto end()
-    {
-        return std::apply([](auto&... ranges) { return std::make_tuple(ranges.end()...); }, ranges);
-    }
+        /**
+         * @brief Return a std::tuple of all the end values of the ranges it was constructed
+         */
+        auto end()
+        {
+            return std::apply([](auto&... ranges) { return std::make_tuple(ranges.end()...); }, ranges);
+        }
 
-    /**
-     * @brief Increment *this
-     * @see incRange
-     */
-    MultiRange& operator++()
-    {
-        incRange();
-        return *this;
-    }
+        /**
+         * @brief Increment *this
+         * @see incRange
+         */
+        MultiRange& operator++()
+        {
+            incRange();
+            return *this;
+        }
 
-    /**
-     * @brief Compares whether two MultiRanges objects are equal
-     * @details
-     * Comparison is done by comparing the highest index Range object, as you typically do in the outer-most layer of a nested for loop
-     */
-    bool operator!=(MultiRange const& rhs) const
-    {
-        return std::get<0>(ranges) != std::get<0>(rhs.ranges);
-    }
+        /**
+         * @brief Compares whether two MultiRanges objects are equal
+         * @details
+         * Comparison is done by comparing the highest index Range object, as you typically do in the outer-most layer of a nested for loop
+         */
+        bool operator!=(MultiRange const& rhs) const
+        {
+            return std::get<0>(ranges) != std::get<0>(rhs.ranges);
+        }
 
-    /**
-     * @brief Compares whether the current values of Range objects in @a *this are the same as in @p rhs
-     * @param rhs Should be a std::tuple of end values
-     */
-    template<typename EndValueTuple>
-    bool operator!=(EndValueTuple const& rhs)
-    {
-        return std::get<0>(ranges) != std::get<0>(rhs);
-    }
+        /**
+         * @brief Compares whether the current values of Range objects in @a *this are the same as in @p rhs
+         * @param rhs Should be a std::tuple of end values
+         */
+        template<typename EndValueTuple>
+        bool operator!=(EndValueTuple const& rhs)
+        {
+            return std::get<0>(ranges) != std::get<0>(rhs);
+        }
 
-    /**
-     * @brief Return a tuple of the current values in *this 
-     */
-    auto operator*() const
-    {
-        return std::apply([](auto&... ranges) { return std::make_tuple(*ranges...); }, ranges);
-    }
+        /**
+         * @brief Return a tuple of the current values in *this
+         */
+        auto operator*() const
+        {
+            return std::apply([](auto&... ranges) { return std::make_tuple(*ranges...); }, ranges);
+        }
 
-    /**
-     * @brief An intuitive way to concat a Range object to a MultiRange object
-     * @param rhs Should be a Range type object
-     */
-    template<typename Range>
-    auto operator|(Range rhs)
-    {
-        return MultiRange{ std::tuple_cat(ranges, rhs) };
-    }
+        /**
+         * @brief An intuitive way to concat a Range object to a MultiRange object
+         * @param rhs Should be a Range type object
+         */
+        template<typename Range>
+        auto operator|(Range rhs)
+        {
+            return MultiRange{ std::tuple_cat(ranges, rhs) };
+        }
 };
 
 
@@ -223,7 +223,7 @@ public:
      * @brief Construct a range object, where `start` is incremented by `step` until >= `end`, `end` is exclusive, meaning the last value you get is always < `end`
      * @note All parameters are expected to be arithmetic values
      */
-    Range(T1 start, T2 end, T3 step = 1) : current(static_cast<ValueType>(start)), max(static_cast<ValueType>(end)), step(static_cast<StepType>(step)) {}
+    constexpr Range(T1 start, T2 end, T3 step = 1) : current(static_cast<ValueType>(start)), max(static_cast<ValueType>(end)), step(static_cast<StepType>(step)) {}
 
     /**
      * @brief Return the current value
@@ -238,12 +238,12 @@ public:
     /**
      * @brief Return the end value, for support of range-based for loop
      */
-    [[nodiscard]]auto end() const { return max; }
+    [[nodiscard]] auto end() const { return max; }
 
     /**
      * @brief Return how many steps it takes from `start` -> `end`, which means `start + steps() * step` >= `end`
      */
-    [[nodiscard]]auto steps() const { return (max - current) / step + 1; }
+    [[nodiscard]] auto steps() const { return (max - current) / step + 1; }
 
     /**
      * @brief Return the span of the range, that is `max-min`
@@ -254,6 +254,17 @@ public:
      * @brief Return the next value of the current range object
      */
     [[nodiscard]] auto next() const { return static_cast<value_type>(current + step); }
+
+    /**
+     * @brief Return whether `this` completely includes/contains `rhs`
+     * @tparam Range Type of the right-hand-side Range
+     * @param rhs The right-hand-side Range object
+     */
+    template<typename Range>
+    [[nodiscard]] bool include(Range const& rhs) const
+    {
+        return current <= rhs.current && max >= rhs.max;
+    }
 
     /**
      * @brief Return whether the current value of `this` == `rhs`
@@ -298,7 +309,7 @@ public:
      */
     using DistType = std::conditional_t <
         std::is_integral_v<value_type>,
-        std::uniform_int_distribution<std::conditional_t<std::is_same_v<value_type, char>||std::is_same_v<value_type, signed char>||std::is_same_v<value_type, unsigned char>, int, value_type>>,
+        std::uniform_int_distribution<std::conditional_t<std::is_same_v<value_type, char> || std::is_same_v<value_type, signed char> || std::is_same_v<value_type, unsigned char>, int, value_type>>,
         std::uniform_real_distribution<value_type>
     >;
 
@@ -309,7 +320,7 @@ public:
      */
     [[nodiscard]] auto getDistribution() const
     {
-        if constexpr(std::is_integral_v<value_type>)
+        if constexpr (std::is_integral_v<value_type>)
             return DistType(current, max - 1);
         return DistType(current, max);
     }
@@ -378,7 +389,7 @@ public:
     template<typename Container>
     void fillRand(Container& container, size_t count)
     {
-        std::generate_n(container.size()>=count? std::begin(container): std::back_inserter(container), count, [ dist = getDistribution() ]() mutable
+        std::generate_n(container.size() >= count ? std::begin(container) : std::back_inserter(container), count, [dist = getDistribution()]() mutable
         {
             return dist(rdEngine);
         });
@@ -416,9 +427,9 @@ public:
     void fillRandFast(Container& container, size_t count)
     {
         std::generate_n(container.size() >= count ? std::begin(container) : std::back_inserter(container), count, [this]
-        {
-            return randFast();
-        });
+            {
+                return randFast();
+            });
     }
 
     /**
@@ -473,7 +484,28 @@ public:
     {
         return MultiRange{ *this, rhs };
     }
+
 };
+namespace
+{
+    class LetterRange :public Range<char, char, int, char, int>
+    {
+    public:
+        constexpr LetterRange(char start, char end, int step = 1) :Range<char, char, int, char, int>{ start, end, step } {}
+        LetterRange& operator++()
+        {
+            Range::operator++();
+            if (*this == 'Z')
+                *this += ('a' - 'Z');
+            return *this;
+        }
+    };
+}
+constexpr static Range<char, char, int, char, int> UpperCaseLetters{ 'A', 'Z' + 1 };
+constexpr static Range<char, char, int, char, int> LowerCaseLetters{ 'a','z' + 1 };
+constexpr static LetterRange Letters{ 'A', 'z' + 1 };
+
+
 
 
 /*Substitute the in<Container> */
@@ -481,7 +513,7 @@ template<typename T, typename ContainerType>
 class ContainerRangeBase;
 
 template <typename Container>
-class Range<void, void, void, Container, void>:public ContainerRangeBase<Range<void, void, void, Container, void>, Container>
+class Range<void, void, void, Container, void> :public ContainerRangeBase<Range<void, void, void, Container, void>, Container>
 {
     Container& range;
 public:
@@ -496,7 +528,7 @@ class Range<void, void, void, Container&&, void> :public ContainerRangeBase<Rang
     Container range;
 public:
     Range(Container& container) = delete;
-    Range(Container&& container) :range(std::forward<Container>(container)){}//copy the temporary 
+    Range(Container&& container) :range(std::forward<Container>(container)) {}//copy the temporary 
     friend ContainerRangeBase<Range<void, void, void, Container&&, void>, Container>;
 };
 

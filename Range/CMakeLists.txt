@@ -5,4 +5,4 @@ project(WhenCpp)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(Range main.cpp "In.hpp")
+add_executable(Range main.cpp)
