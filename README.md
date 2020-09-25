@@ -2,7 +2,7 @@
 SugarPP is a collection of syntactic candy for C++ code.
 
 - [How to Use](#how-to-use)
-- Requirements
+- [Requirements](#requirements)
 - [Features](#features)
     - [Kotlin-style `when` syntax](#kotlin-style-when-syntax)
         - [Usage](#usage)
