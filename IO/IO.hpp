@@ -1,7 +1,7 @@
 /*****************************************************************//**
  * \file   IO.hpp
  * \brief  Convenient functions for using std::cin/cout
- * 
+ *
  * \author Peter
  * \date   September 2020
  *********************************************************************/
@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <string>
+#include <tuple>
 
 /**
  * @brief Restore the error state of the stream and "eat" the rest invalid input left in the stream

@@ -1,7 +1,7 @@
-#include "Range.hpp"
-#include "../IO/IO.hpp"
-#include "Enumerate.hpp"
-#include "In.hpp"
+#include "../../Range/Range.hpp"
+#include "../../IO/IO.hpp"
+#include "../../Range/Enumerate.hpp"
+#include "../../Range/In.hpp"
 #include <iostream>
 #include <array>
 int main()

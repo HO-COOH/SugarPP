@@ -289,4 +289,4 @@ int main()
 ```
 
 #### Documentation
-See `docs/Range.md` and `docs/Enumerate.md`.
+See `docs/Range.md`.
