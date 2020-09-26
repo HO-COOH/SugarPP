@@ -362,36 +362,41 @@ namespace detail
             return ReturnResult;
     }
 
+    template <bool convertToFunction, typename ExprType, typename is_not_type, typename Return1Type, typename Case2Type, typename... Args>
+    auto when_impl(ExprType &&expr, is_not<is_not_type>, Return1Type &&return1, Case2Type &&case2, Args &&... args);
+    template <bool convertToFunction, typename ExprType, typename is_type, typename Return1Type, typename Case2Type, typename... Args>
+    auto when_impl(ExprType &&expr, is<is_type>, Return1Type &&return1, Case2Type &&case2, Args &&... args);
+    template <bool convertToFunction, typename Return1Type, typename Case2Type, typename... Args>
+    auto when_impl(const char *Expr, const char *Case1, Return1Type &&return1, Case2Type &&case2, Args &&... args);
 
     template <bool convertToFunction, typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args>
-    auto when_impl(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
+    auto when_impl(ExprType &&expr, Case1Type &&case1, Return1Type &&return1, Case2Type &&case2, Args &&... args)
     {
         if constexpr (std::is_same_v<std::remove_reference_t<Case1Type>, bool>)
         {
             if (case1)
             {
                 if constexpr (convertToFunction)
-                    return std::function{ return1 };
+                    return std::function{return1};
                 else
                     return return1;
             }
         }
-        else if constexpr (comparable<ExprType,Case1Type>::value)
+        else if constexpr (comparable<ExprType, Case1Type>::value)
         {
-            if (expr==case1)
+            if (expr == case1)
             {
                 if constexpr (convertToFunction)
-                    return std::function{ return1 };
+                    return std::function{return1};
                 else
                     return return1;
             }
             else
                 return when_impl<convertToFunction>(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
         }
-        else 
+        else
             return when_impl<convertToFunction>(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
     }
-
     template <bool convertToFunction, typename Return1Type, typename Case2Type, typename... Args>
     auto when_impl(const char* Expr, const char* Case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
     {
@@ -406,7 +411,7 @@ namespace detail
     }
 
     template <bool convertToFunction, typename ExprType, typename is_type, typename Return1Type, typename Case2Type, typename... Args>
-    auto when_impl(ExprType&& expr, is<is_type>, Return1Type&& return1, Case2Type&& case2, Args... args)
+    auto when_impl(ExprType&& expr, is<is_type>, Return1Type&& return1, Case2Type&& case2, Args&&... args)
     {
         if constexpr (std::is_same_v<std::remove_reference_t<ExprType>, typename is<is_type>::type>)
         {
@@ -419,7 +424,7 @@ namespace detail
     }
 
     template <bool convertToFunction, typename ExprType, typename is_not_type, typename Return1Type, typename Case2Type, typename... Args>
-    auto when_impl(ExprType&& expr, is_not<is_not_type>, Return1Type&& return1, Case2Type&& case2, Args... args)
+    auto when_impl(ExprType&& expr, is_not<is_not_type>, Return1Type&& return1, Case2Type&& case2, Args&&... args)
     {
         if constexpr (!std::is_same_v<std::remove_reference_t<ExprType>, typename is_not<is_not_type>::type>)
         {

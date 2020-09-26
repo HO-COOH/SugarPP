@@ -4,4 +4,4 @@
 /html
 /latex
 **/build/*
-settings.json
+*.json
