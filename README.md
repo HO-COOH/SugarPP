@@ -7,7 +7,6 @@ SugarPP is a collection of syntactic candy for C++ code.
   - [Features](#features)
     - [Kotlin-style `when` syntax](#kotlin-style-when-syntax)
       - [Usage](#usage)
-      - [Requirements](#requirements-1)
       - [Documentation](#documentation)
     - [Simpler IO](#simpler-io)
       - [Features](#features-1)
@@ -20,8 +19,13 @@ SugarPP is a collection of syntactic candy for C++ code.
 ## How to Use
 SugarPP is **header only**. Just clone this repository or copy the corresponding header files you want to use.
 
+You can find **quick** documentation for every modules in [./docs](./docs/)
+
+You can find examples for every modules in [./examples](./examples/)
+
+Alternatively, see [generated doxygen document here.](https://ho-cooh.github.io/SugarPPDoc/html/index.html)
 ## Requirements
-SugarPP uses various C++17 language features and, as a consequence, requires a C++17 compatible compiler to use.
+SugarPP uses various C++17 language features thus requires a C++17 compatible compiler to use.
 
 ## Features
 
@@ -49,7 +53,6 @@ when (x) {
 ```cpp
 /* SugarPP */
 #include "When/When.hpp"
-
 when (x,
     1,      []{ puts("x == 1"); },
     2,      []{ puts("x == 2"); },
@@ -72,7 +75,6 @@ fun describe(obj: Any): String =
 ```cpp
 /*SugarPP*/
 #include "When/When.hpp"
-
 auto describe = [](auto&& obj) {
     return when(obj,
         1,                      "One",
@@ -98,9 +100,8 @@ when (x) {
 
 ```cpp
 /*SugarPP*/
-#include "Range/In.hpp" // Range
-#include "When/When.hpp" // When
-
+#include "Range/In.hpp"     // Range
+#include "When/When.hpp"    // When
 std::array validNumbers{11,13,17,19};
 when(x,
     Range(1, 10),       []{ puts("x is in the range"); },
@@ -115,15 +116,10 @@ idea, it's actually quite powerful and demonstrates the flexibility of
 `template`.
 
 #### Usage
-Just copy `When` and include `When/When.hpp` in your project.
-
-#### Requirements
-`when` requires a C++17 compatible compiler, as it uses `constexpr if`,
-a C++17 feature (although pre-C++17 support may come later). The same
-functionality is also implemented in C++20 concepts.
+Just copy [When.hpp](./When/When.hpp) and add `#include "When.hpp"` in your project.
 
 #### Documentation
-Documentation and examples can be found in [docs/When.md](./docs/When.md) and `examples/When`.
+See [docs/When.md](./docs/When.md) 
 
 -------------------------------------------------------------------------
 ### Simpler IO
@@ -152,11 +148,13 @@ The `print` function also behaves similar to Python's `print`; it can print any 
 `printLn` behaves similarly, but prints each argument on a new line.
 
 #### Usage
-Just copy and include `IO/IO.hpp`.
-More detailed examples can be found in `examples/IO`.
+Just copy [./IO/IO.hpp](./IO/IO.hpp) and add ``#include "IO.hpp"``.
+
+More examples in [./examples/IO/main.cpp](./examples/IO/main.cpp).
 
 ```cpp
 #include "IO/IO.hpp"
+ 
 int main()
 {
     print("Hello, what's your name?");
@@ -181,7 +179,7 @@ int main()
 ```
 
 #### Documentation
-Documentation can be found in [docs/IO.md](./docs/IO.md).
+See [docs/IO.md](./docs/IO.md).
 
 ------------------------------------------------------------
 ### Range
@@ -211,8 +209,12 @@ SugarPP also has an `Enumerate` class, which accomplishes a similar task to Pyth
 
 #### Usage
 
-Copy `Range` and include `Range/Range.hpp` and `Range/Enumerate.hpp`.
-For more examples see `examples/Range` and `examples/Enumerate`.
+Just copy [./Range/Range.hpp](./Range/Range.hpp) and add ``#include "Range.hpp"`` for ``Range``.
+
+Just copy [./Range/Enumerate.hpp](./Range/Enumerate.hpp) and add `#include "Enumerate.hpp"` for ``Enumerate``.
+
+More examples in [./examples/Range/main.cpp](./examples/Range/main.cpp)
+
 ```cpp
 #include "../IO/IO.hpp" //for print()
 #include "Range.hpp"

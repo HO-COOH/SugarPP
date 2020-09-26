@@ -455,9 +455,9 @@ constexpr bool shouldConvert()
  * @brief The non-Else Final Case Primary template
  *
  * @param expr the expression to match
- * @param to_match the case to match with expression
- * @param ReturnResult the object to return
- * @return [ReturnResult] if matches, else return the default constructed object the same type as [expr]
+ * @param toMatch the case to match with expression
+ * @param returnResult the object to return
+ * @return \preturnResult if matches, else return the default constructed object the same type as \pexpr
  */
 template <typename ExprType, typename CaseType, typename ReturnType>
 auto when(ExprType&& expr, CaseType&& toMatch, ReturnType&& returnResult)
@@ -469,8 +469,10 @@ auto when(ExprType&& expr, CaseType&& toMatch, ReturnType&& returnResult)
  * @brief The special case for handling is<SomeType> expression
  *
  * @tparam is_type the type query for whether [expr] has the same type
- * @param ReturnResult the object to return
- * @return \p ReturnResult if \b ExprType is the same as \b is_type, otherwise return a default constructed \b ReturnType object
+ * @param expr the expression to match
+ * @param dummy place holder for is<is_type>
+ * @param returnResult the object to return
+ * @return \preturnResult if \bExprType is the same as \bis_type, otherwise return a default constructed \breturnType object
  */
 template <typename ExprType, typename is_type, typename ReturnType>
 auto when(ExprType&& expr, is<is_type> dummy, ReturnType&& returnResult)
@@ -482,8 +484,10 @@ auto when(ExprType&& expr, is<is_type> dummy, ReturnType&& returnResult)
  * @brief The special case for handling is<SomeType> expression
  *
  * @tparam is_not_type the type query for whether [expr] has the same type
- * @param ReturnResult the object to return
- * @return \p ReturnResult if \b ExprType is \b NOT the same as \b is_not_type, otherwise return a default constructed \b ReturnType object
+ * @param expr the expression to match
+ * @param dummy place holder for is_not<is_not_type>
+ * @param returnResult the object to return
+ * @return \pReturnResult if \bExprType is \bNOT the same as \bis_not_type, otherwise return a default constructed \breturnType object
  */
 template <typename ExprType, typename is_not_type, typename ReturnType>
 auto when(ExprType&& expr, is_not<is_not_type> dummy, ReturnType&& returnResult)
@@ -496,7 +500,7 @@ auto when(ExprType&& expr, is_not<is_not_type> dummy, ReturnType&& returnResult)
  * @tparam ReturnType type of \p ReturnResult
  * @param expr The C string to be matched with
  * @param Case The C string to be match with \p expr (capital 'C' to avoid conflict with "case" keyword)
- * @param ReturnResult the object to return
+ * @param returnResult the object to return
  * @return \p ReturnResult if ``strcmp(expr, Case)==0``, otherwise return a default constructed \b ReturnType object
  */
 template <typename ReturnType>
@@ -509,7 +513,9 @@ auto when(const char* expr, const char* Case, ReturnType&& returnResult)
  * @brief The special case for handling <Else> expression
  *
  * @tparam ExprType type of not-used expression
- * @param ReturnResult the object to return
+ * @param expr the expression to match
+ * @param dummy the placeholder of Else
+ * @param returnResult the object to return
  * @return \p ReturnResult
  */
 template <typename ExprType, typename ReturnType>
@@ -539,7 +545,7 @@ auto when(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&&
 }
 
 /**
- * @brief Special case for handling C string
+ * @brief primary recursive template specialized for C string
 */
 template <typename Return1Type, typename Case2Type, typename... Args>
 auto when(const char* expr, const char* case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
@@ -554,7 +560,7 @@ auto when(const char* expr, const char* case1, Return1Type&& return1, Case2Type&
 }
 
 /**
- * @brief Special case for handling \b is<Type> query
+ * @brief primary recursive template specialized for is<is_type> query
 */
 template <typename ExprType, typename is_type, typename Return1Type, typename Case2Type, typename... Args>
 auto when(ExprType&& expr, is<is_type> dummy, Return1Type&& return1, Case2Type&& case2, Args... args)
@@ -569,7 +575,7 @@ auto when(ExprType&& expr, is<is_type> dummy, Return1Type&& return1, Case2Type&&
 }
 
 /**
- * @brief Special case for handling \b is_not<Type> query
+ * @brief primary recursive template specialized for is_not<is_not_type> query
  */
 template <typename ExprType, typename is_not_type, typename Return1Type, typename Case2Type, typename... Args>
 auto when(ExprType&& expr, is_not<is_not_type> dummy, Return1Type&& return1, Case2Type&& case2, Args... args)
