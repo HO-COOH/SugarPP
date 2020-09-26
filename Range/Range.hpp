@@ -354,7 +354,7 @@ public:
     [[nodiscard]] auto rand() const
     {
         std::array<value_type, N> values;
-        std::generate(values.begin(), values.end(), [dist = getDistribution()]{ return dist(rdEngine); });
+        std::generate(values.begin(), values.end(), [dist = getDistribution()]() mutable { return dist(rdEngine); });
         return values;
     }
 
@@ -517,9 +517,13 @@ class Range<void, void, void, Container, void> :public ContainerRangeBase<Range<
 {
     Container& range;
 public:
-    Range(Container& container) :range(container) {}
+    explicit Range(Container& container) :range(container) {}
     Range(Container&& container) = delete;  //Another overload is necessary to handle the case when [container] is an rvalue, otherwise dangling reference
     friend ContainerRangeBase<Range<void, void, void, Container, void>, Container>;
+    friend bool operator==(typename Container::value_type &&num, Range const &rhs)
+    {
+        return rhs == num;
+    }
 };
 
 template <typename Container>
@@ -528,8 +532,12 @@ class Range<void, void, void, Container&&, void> :public ContainerRangeBase<Rang
     Container range;
 public:
     Range(Container& container) = delete;
-    Range(Container&& container) :range(std::forward<Container>(container)) {}//copy the temporary 
+    explicit Range(Container &&container) : range(std::forward<Container>(container)) {} //copy the temporary
     friend ContainerRangeBase<Range<void, void, void, Container&&, void>, Container>;
+    friend bool operator==(typename Container::value_type&& num, Range const& rhs)
+    {
+        return rhs == num;
+    }
 };
 
 template<typename T, typename ContainerType>
@@ -545,11 +553,11 @@ public:
 };
 
 
-template<typename Range>
-bool operator==(typename Range::value_type&& value, Range const& in)
-{
-    return in == value;
-}
+// template<typename Range>
+// bool operator==(typename Range::value_type&& value, Range const& in)
+// {
+//     return in == value;
+// }
 
 template<typename Container>
 Range(Container&)->Range<void, void, void, Container, void>;

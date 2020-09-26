@@ -1,21 +1,24 @@
 # SugarPP: syntactic 🍬 for programming in C++
 SugarPP is a collection of syntactic candy for C++ code.
 
-- [How to Use](#how-to-use)
-- [Requirements](#requirements)
-- [Features](#features)
+- [SugarPP: syntactic 🍬 for programming in C++](#sugarpp-syntactic--for-programming-in-c)
+  - [How to Use](#how-to-use)
+  - [Requirements](#requirements)
+  - [Features](#features)
     - [Kotlin-style `when` syntax](#kotlin-style-when-syntax)
-        - [Usage](#usage)
-        - [Documentation](#documentation)
+      - [Usage](#usage)
+      - [Requirements](#requirements-1)
+      - [Documentation](#documentation)
     - [Simpler IO](#simpler-io)
-        - [Usage](#usage-1)
-        - [Documentation](#documentation-1)
+      - [Features](#features-1)
+      - [Usage](#usage-1)
+      - [Documentation](#documentation-1)
     - [Range](#range)
-        - [Usage](#usage-2)
-        - [Documentation](#documentation-2)
+      - [Usage](#usage-2)
+      - [Documentation](#documentation-2)
 
 ## How to Use
-SugarPP is *header only*. Just clone this repository and copy the header files you want to use.
+SugarPP is **header only**. Just clone this repository or copy the corresponding header files you want to use.
 
 ## Requirements
 SugarPP uses various C++17 language features and, as a consequence, requires a C++17 compatible compiler to use.
@@ -31,7 +34,7 @@ matching **integer** values; however, Kotlin's `when` can match any comparable t
 
 SugarPP has its own analogue to Kotlin's `when`:
 
-Value matching (for *any comparable type*, not just integers):
+- Value matching (for *any comparable type*, not just integers):
 ```kotlin
 /* Kotlin */
 when (x) {
@@ -48,13 +51,13 @@ when (x) {
 #include "When/When.hpp"
 
 when (x,
-    1, []{ puts("x == 1"); },
-    2, []{ puts("x == 2"); },
+    1,      []{ puts("x == 1"); },
+    2,      []{ puts("x == 2"); },
     Else(), []{ puts("x is neither 1 nor 2"); }
 );
 ```
 
-Type matching:
+- Type matching:
 ```kotlin
 /*kotlin*/
 fun describe(obj: Any): String =
@@ -81,10 +84,9 @@ auto describe = [](auto&& obj) {
 };
 ```
 
-Range matching:
+- Range matching:
 ```kotlin
 /*kotlin*/
-
 val validNumbers = arrayOf(11, 13, 17, 19)
 when (x) {
     in 1..10 ->         print("x is in the range")
@@ -121,10 +123,9 @@ a C++17 feature (although pre-C++17 support may come later). The same
 functionality is also implemented in C++20 concepts.
 
 #### Documentation
-Documentation and examples can be found in `docs/When.md` and `examples/When`.
-The examples require CMake and Make to compile.
+Documentation and examples can be found in [docs/When.md](./docs/When.md) and `examples/When`.
 
-
+-------------------------------------------------------------------------
 ### Simpler IO
 IO in C++ should work how you expect it to. SugarPP's IO functions are simple
 and much more intuitive than native C++ IO. No more messing with `getchar()` and
@@ -180,8 +181,9 @@ int main()
 ```
 
 #### Documentation
-Documentation can be found in `docs/IO.md`.
+Documentation can be found in [docs/IO.md](./docs/IO.md).
 
+------------------------------------------------------------
 ### Range
 Use numerical ranges in your `for` loop!
 *Not to be confused with C++20 ranges.*
@@ -200,7 +202,7 @@ for i in range(0, 10):
 ```
 
 SugarPP adds support for this with the `Range` class. `Range` supports:
-- `start`, `end`, and `step (default = 1)` with a C++ foreach loop. Type will be inferred (C++17) and automatically converted if needed.
+- `start`, `end`, and `step (default = 1)` with a C++ foreach loop. Type will be inferred and automatically converted if needed.
 - Multiple-dimension ranges
 - Generating a random number within the range
 - Filling a container with random numbers
@@ -289,4 +291,4 @@ int main()
 ```
 
 #### Documentation
-See `docs/Range.md`.
+See [docs/Range.md](./docs/Range.md).

@@ -1,10 +1,10 @@
-#include "....//IO/IO.hpp"
+#include "../../IO/IO.hpp"
 #include <array>
 #include <iostream>
 #include <tuple>
 #include <vector>
 
-void printSeparator()
+static void printSeparator()
 {
     std::cout << "----------------------------------";
 }
@@ -35,9 +35,9 @@ int main()
 
 
     print("Hello, what's your name?");
-    auto name = input<std::string>("Enter your name: ");
+    const auto name = input<std::string>("Enter your name: ");
     print("Hello,", name, "How old are you?");
-    auto age = input<int>("Enter your age: ");
+    const auto age = input<int>("Enter your age: ");
     print("Thanks you,", name, "who is", age, "years old");
 
     /*print any iterable*/

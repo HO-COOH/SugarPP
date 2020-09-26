@@ -11,7 +11,6 @@
 #include <utility>
 #include <cstring>  //for strcmp()
 #include <utility>
-#include "../Range/Range.hpp"
 
 
 /**
@@ -51,7 +50,7 @@ public:
     }
 };
 template<typename Expr, typename NotType, typename = std::enable_if_t<comparable<Expr, NotType>::value>>
-bool operator==(Expr&& expr, NOT<NotType>&& notCase)
+bool operator==(Expr&& expr, NOT<NotType> const& notCase)
 {
     return notCase == expr;
 }
@@ -75,7 +74,7 @@ public:
 
 };
 template<typename Expr, typename Case1, typename Case2, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
-bool operator==(Expr&& expr, AND<Case1, Case2>&& andCase)
+bool operator==(Expr&& expr, AND<Case1, Case2> const& andCase)
 {
     return andCase == expr;
 }
@@ -98,7 +97,7 @@ public:
     }
 };
 template<typename Expr, typename Case1, typename Case2, typename = std::enable_if_t<comparable<Expr, Case1>::value&& comparable<Expr, Case2>::value>>
-bool operator==(Expr&& expr, OR<Case1, Case2>&& orCase)
+bool operator==(Expr&& expr, OR<Case1, Case2> const& orCase)
 {
     return orCase == expr;
 }
@@ -109,7 +108,7 @@ bool operator==(Expr&& expr, OR<Case1, Case2>&& orCase)
  */
 struct Else
 {
-    constexpr operator bool() const { return false; }
+    constexpr operator bool() const { return true; }
 };
 
 /**
@@ -275,15 +274,6 @@ auto when_impl(auto&& expr, is_not<is_not_type>, auto&& return1, auto&& case2, a
 namespace detail
 {
 
-
-    /**
-     * @brief The non-Else Final Case Primary template
-     *
-     * @param expr the expression to match
-     * @param to_match the case to match with expression
-     * @param ReturnResult the object to return
-     * @return [ReturnResult] if matches, else return the default constructed object the same type as [expr]
-     */
     template <bool convertToFunction = false, typename ExprType, typename CaseType, typename ReturnType>
     auto when_impl(ExprType&& expr, CaseType&& to_match, ReturnType&& ReturnResult)
     {
@@ -299,7 +289,7 @@ namespace detail
             }
         }
         /*If [to_match] is something comparable to [expr]*/
-        if constexpr (comparable<ExprType, CaseType>::value)
+        if constexpr (comparable<std::remove_reference_t<ExprType>, std::remove_reference_t<CaseType>>::value)
         {
             if (to_match == expr)
             {
@@ -315,13 +305,6 @@ namespace detail
             return std::remove_reference_t<ReturnType>{};
     }
 
-    /**
-     * @brief The special case for handling is<SomeType> expression
-     *
-     * @tparam is_type the type query for whether [expr] has the same type
-     * @param ReturnResult the object to return
-     * @return \p ReturnResult if \b ExprType is the same as \b is_type, otherwise return a default constructed \b ReturnType object
-     */
     template <bool convertToFunction = false, typename ExprType, typename is_type, typename ReturnType>
     auto when_impl(ExprType&&, is<is_type>, ReturnType&& ReturnResult)
     {
@@ -338,13 +321,6 @@ namespace detail
             return std::remove_reference_t<ReturnType>{};
     }
 
-    /**
-     * @brief The special case for handling is<SomeType> expression
-     *
-     * @tparam is_not_type the type query for whether [expr] has the same type
-     * @param ReturnResult the object to return
-     * @return \p ReturnResult if \b ExprType is \b NOT the same as \b is_not_type, otherwise return a default constructed \b ReturnType object
-     */
     template <bool convertToFunction = false, typename ExprType, typename is_not_type, typename ReturnType>
     auto when_impl(ExprType&&, is_not<is_not_type>, ReturnType&& ReturnResult)
     {
@@ -362,14 +338,6 @@ namespace detail
     }
 
 
-    /**
-     * @brief Special case for handling C string
-     * @tparam ReturnType type of \p ReturnResult
-     * @param expr The C string to be matched with
-     * @param Case The C string to be match with \p expr (capital 'C' to avoid conflict with "case" keyword)
-     * @param ReturnResult the object to return
-     * @return \p ReturnResult if ``strcmp(expr, Case)==0``, otherwise return a default constructed \b ReturnType object
-     */
     template <bool convertToFunction = false, typename ReturnType>
     auto when_impl(const char* expr, const char* Case, ReturnType&& ReturnResult)
     {
@@ -385,13 +353,6 @@ namespace detail
         return std::remove_reference_t<ReturnType>{};
     }
 
-    /**
-     * @brief The special case for handling <Else> expression
-     *
-     * @tparam ExprType type of not-used expression
-     * @param ReturnResult the object to return
-     * @return \p ReturnResult
-     */
     template <bool convertToFunction, typename ExprType, typename ReturnType>
     auto when_impl(ExprType&&, Else, ReturnType&& ReturnResult)
     {
@@ -402,9 +363,6 @@ namespace detail
     }
 
 
-    /**
-     * @brief primary recursive template
-    */
     template <bool convertToFunction, typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args>
     auto when_impl(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
     {
@@ -418,9 +376,9 @@ namespace detail
                     return return1;
             }
         }
-        if constexpr (comparable<ExprType, Case1Type>::value)
+        else if constexpr (comparable<ExprType,Case1Type>::value)
         {
-            if (case1 == expr)
+            if (expr==case1)
             {
                 if constexpr (convertToFunction)
                     return std::function{ return1 };
@@ -430,12 +388,10 @@ namespace detail
             else
                 return when_impl<convertToFunction>(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
         }
-        return when_impl<convertToFunction>(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
+        else 
+            return when_impl<convertToFunction>(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
     }
 
-    /**
-     * @brief Special case for handling C string
-    */
     template <bool convertToFunction, typename Return1Type, typename Case2Type, typename... Args>
     auto when_impl(const char* Expr, const char* Case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
     {
@@ -449,9 +405,6 @@ namespace detail
         return when_impl<convertToFunction>(Expr, std::forward<Case2Type>(case2), std::forward<Args>(args)...);
     }
 
-    /**
-     * @brief Special case for handling \b is<Type> query
-    */
     template <bool convertToFunction, typename ExprType, typename is_type, typename Return1Type, typename Case2Type, typename... Args>
     auto when_impl(ExprType&& expr, is<is_type>, Return1Type&& return1, Case2Type&& case2, Args... args)
     {
@@ -465,9 +418,6 @@ namespace detail
         return when_impl<convertToFunction>(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
     }
 
-    /**
-     * @brief Special case for handling \b is_not<Type> query
-     */
     template <bool convertToFunction, typename ExprType, typename is_not_type, typename Return1Type, typename Case2Type, typename... Args>
     auto when_impl(ExprType&& expr, is_not<is_not_type>, Return1Type&& return1, Case2Type&& case2, Args... args)
     {
@@ -500,51 +450,137 @@ constexpr bool shouldConvert()
             return !(current && shouldConvert<I + 2, Tuple>());
     }
 }
+
+/**
+ * @brief The non-Else Final Case Primary template
+ *
+ * @param expr the expression to match
+ * @param to_match the case to match with expression
+ * @param ReturnResult the object to return
+ * @return [ReturnResult] if matches, else return the default constructed object the same type as [expr]
+ */
 template <typename ExprType, typename CaseType, typename ReturnType>
-auto when(ExprType&& expr, CaseType&& to_match, ReturnType&& ReturnResult)
+auto when(ExprType&& expr, CaseType&& toMatch, ReturnType&& returnResult)
 {
-    return detail::when_impl<false>(expr, to_match, ReturnResult);
+    return detail::when_impl<false>(std::forward<ExprType>(expr), std::forward<CaseType>(toMatch), std::forward<ReturnType>(returnResult));
 }
+
+/**
+ * @brief The special case for handling is<SomeType> expression
+ *
+ * @tparam is_type the type query for whether [expr] has the same type
+ * @param ReturnResult the object to return
+ * @return \p ReturnResult if \b ExprType is the same as \b is_type, otherwise return a default constructed \b ReturnType object
+ */
 template <typename ExprType, typename is_type, typename ReturnType>
-auto when(ExprType&& expr, is<is_type> dummy, ReturnType&& ReturnResult)
+auto when(ExprType&& expr, is<is_type> dummy, ReturnType&& returnResult)
 {
-    return detail::when_impl<false>(expr, dummy, ReturnResult);
+    return detail::when_impl<false>(std::forward<ExprType>(expr), dummy, std::forward<ReturnType>(returnResult));
 }
+
+/**
+ * @brief The special case for handling is<SomeType> expression
+ *
+ * @tparam is_not_type the type query for whether [expr] has the same type
+ * @param ReturnResult the object to return
+ * @return \p ReturnResult if \b ExprType is \b NOT the same as \b is_not_type, otherwise return a default constructed \b ReturnType object
+ */
 template <typename ExprType, typename is_not_type, typename ReturnType>
-auto when(ExprType&& expr, is_not<is_not_type> dummy, ReturnType&& ReturnResult)
+auto when(ExprType&& expr, is_not<is_not_type> dummy, ReturnType&& returnResult)
 {
-    return detail::when_impl<false>(expr, dummy, ReturnResult);
+    return detail::when_impl<false>(std::forward<ExprType>(expr), dummy, std::forward<ReturnType>(returnResult));
 }
+
+/**
+ * @brief Special case for handling C string
+ * @tparam ReturnType type of \p ReturnResult
+ * @param expr The C string to be matched with
+ * @param Case The C string to be match with \p expr (capital 'C' to avoid conflict with "case" keyword)
+ * @param ReturnResult the object to return
+ * @return \p ReturnResult if ``strcmp(expr, Case)==0``, otherwise return a default constructed \b ReturnType object
+ */
 template <typename ReturnType>
-auto when(const char* expr, const char* Case, ReturnType&& ReturnResult)
+auto when(const char* expr, const char* Case, ReturnType&& returnResult)
 {
-    return detail::when_impl<false>(expr, Case, ReturnResult);
+    return detail::when_impl<false>(expr, Case, std::forward<ReturnType>(returnResult));
 }
+
+/**
+ * @brief The special case for handling <Else> expression
+ *
+ * @tparam ExprType type of not-used expression
+ * @param ReturnResult the object to return
+ * @return \p ReturnResult
+ */
 template <typename ExprType, typename ReturnType>
-auto when(ExprType&& expr, Else dummy, ReturnType&& ReturnResult)
+auto when(ExprType&& expr, Else dummy, ReturnType&& returnResult)
 {
-    return detail::when_impl<false>(expr, dummy, ReturnResult);
+    return detail::when_impl<false>(std::forward<ExprType>(expr), dummy, std::forward<ReturnType>(returnResult));
 }
+
+/**
+ * @brief primary recursive template
+*/
 template <typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args>
 auto when(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
 {
-    return detail::when_impl<shouldConvert<2, decltype(std::forward_as_tuple(expr, case1, return1, case2, args...))>()>(expr, case1, return1, case2, args...);
+    return detail::when_impl
+    <
+        shouldConvert
+        <
+            2,
+            decltype(std::forward_as_tuple(expr, case1, return1, case2, args...))
+        >()
+    >(std::forward<ExprType>(expr),
+    std::forward<Case1Type>(case1),
+    std::forward<Return1Type>(return1), 
+    std::forward<Case2Type>(case2), 
+    std::forward<Args>(args)...);
 }
+
+/**
+ * @brief Special case for handling C string
+*/
 template <typename Return1Type, typename Case2Type, typename... Args>
-auto when(const char* Expr, const char* Case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
+auto when(const char* expr, const char* case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
 {
-    return detail::when_impl<shouldConvert<2, decltype(std::forward_as_tuple(Expr, Case1, return1, case2, args...))>()>(Expr, Case1, return1, case2, args...);
+    return detail::when_impl
+    <
+        shouldConvert
+        <
+            2, decltype(std::forward_as_tuple(expr, case1, return1, case2, args...))
+        >()
+    >(expr, case1, std::forward<Return1Type>(return1), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
 }
+
+/**
+ * @brief Special case for handling \b is<Type> query
+*/
 template <typename ExprType, typename is_type, typename Return1Type, typename Case2Type, typename... Args>
 auto when(ExprType&& expr, is<is_type> dummy, Return1Type&& return1, Case2Type&& case2, Args... args)
 {
-    return detail::when_impl<shouldConvert<2, decltype(std::forward_as_tuple(expr, dummy, return1, case2, args...))>()>(expr, dummy, return1, case2, args...);
+    return detail::when_impl
+    <
+        shouldConvert
+        <
+            2, decltype(std::forward_as_tuple(expr, dummy, return1, case2, args...))
+        >()
+    >(std::forward<ExprType>(expr), dummy, std::forward<Return1Type>(return1), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
 }
 
+/**
+ * @brief Special case for handling \b is_not<Type> query
+ */
 template <typename ExprType, typename is_not_type, typename Return1Type, typename Case2Type, typename... Args>
 auto when(ExprType&& expr, is_not<is_not_type> dummy, Return1Type&& return1, Case2Type&& case2, Args... args)
 {
-    return detail::when_impl<shouldConvert<2, decltype(std::forward_as_tuple(expr, dummy, return1, case2, args...))>()>(expr, dummy, return1, case2, args...);
+    return detail::when_impl
+    <
+        shouldConvert
+        <
+            2, decltype(std::forward_as_tuple(expr, dummy, return1, case2, args...))
+        >()
+    >(std::forward<ExprType>(expr), dummy, std::forward<Return1Type>(return1), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
 }
 
 #endif
