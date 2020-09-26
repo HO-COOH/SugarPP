@@ -1,54 +1,60 @@
-# SugarPP
-A collection of my syntactic 🍬 when programming in C++. **When can we have nice things?**
-- [SugarPP](#sugarpp)
-  - [Kotlin ``when`` C++ port](#kotlin-when-c-port)
-    - [Introduction](#introduction)
-    - [Usage](#usage)
-    - [Requirement](#requirement)
-    - [Example](#example)
-    - [Advanced Usage](#advanced-usage)
-    - [Documentation](#documentation)
-    - [To-DO](#to-do)
-  - [IO](#io)
-    - [Introduction](#introduction-1)
-    - [Usage](#usage-1)
-    - [Example](#example-1)
-    - [Documentation](#documentation-1)
-  - [Range](#range)
-    - [Introduction](#introduction-2)
-    - [Example](#example-2)
-    - [Usage](#usage-2)
-    - [Documentation](#documentation-2)
-      - [Type](#type)
-      - [Constructor](#constructor)
-      - [Public Member functions](#public-member-functions)
-      - [Non Member functions](#non-member-functions)
+# SugarPP: syntactic 🍬 for programming in C++
+SugarPP is a collection of syntactic candy for C++ code.
 
+- [How to Use](#how-to-use)
+- [Requirements](#requirements)
+- [Features](#features)
+    - [Kotlin-style `when` syntax](#kotlin-style-when-syntax)
+        - [Usage](#usage)
+        - [Documentation](#documentation)
+    - [Simpler IO](#simpler-io)
+        - [Usage](#usage-1)
+        - [Documentation](#documentation-1)
+    - [Range](#range)
+        - [Usage](#usage-2)
+        - [Documentation](#documentation-2)
 
-## Kotlin ``when`` C++ port
-A header only port of ``when`` statement/expression in kotlin.
-### Introduction
-In [the official kotlin language tutorial](https://kotlinlang.org/docs/reference/basic-syntaxhtml#using-when-expression), the ``when`` expression is a pretty nice syntax sugar forreplacing traditional ``switch case`` statement seens in most languages. The drawback for``switch`` at least in C/C++ though is that it only supports matching **integer** values. Butthe kotlin's ``when`` basically supports these operations:
-- value matching (for all comparable type)
+## How to Use
+SugarPP is *header only*. Just clone this repository and copy the header files you want to use.
+
+## Requirements
+SugarPP uses various C++17 language features and, as a consequence, requires a C++17 compatible compiler to use.
+
+## Features
+
+### Kotlin-style `when` syntax
+
+[Kotlin](https://kotlinlang.org/) has the `when` expression for matching values,
+replacing the traditional `switch/case` in most languages.
+C/C++'s native `switch/case` has the drawback of only
+matching **integer** values; however, Kotlin's `when` can match any comparable type.
+
+SugarPP has its own analogue to Kotlin's `when`:
+
+Value matching (for *any comparable type*, not just integers):
 ```kotlin
-/*kotlin*/
+/* Kotlin */
 when (x) {
     1 -> print("x == 1")
     2 -> print("x == 2")
-    else -> { // Note the block
+    else -> { // Note the block here
         print("x is neither 1 nor 2")
     }
 }
 ```
+
 ```cpp
-/*SugarPP*/
-when(x,
+/* SugarPP */
+#include "When/When.hpp"
+
+when (x,
     1, []{ puts("x == 1"); },
     2, []{ puts("x == 2"); },
     Else(), []{ puts("x is neither 1 nor 2"); }
 );
 ```
-- type matching
+
+Type matching:
 ```kotlin
 /*kotlin*/
 fun describe(obj: Any): String =
@@ -62,6 +68,8 @@ fun describe(obj: Any): String =
 ```
 ```cpp
 /*SugarPP*/
+#include "When/When.hpp"
+
 auto describe = [](auto&& obj) {
     return when(obj,
         1,                      "One",
@@ -72,9 +80,12 @@ auto describe = [](auto&& obj) {
     );
 };
 ```
-- range matching
+
+Range matching:
 ```kotlin
 /*kotlin*/
+
+val validNumbers = arrayOf(11, 13, 17, 19)
 when (x) {
     in 1..10 ->         print("x is in the range")
     in validNumbers ->  print("x is valid")
@@ -85,7 +96,9 @@ when (x) {
 
 ```cpp
 /*SugarPP*/
-#include "../Range/In.hpp"
+#include "Range/In.hpp" // Range
+#include "When/When.hpp" // When
+
 std::array validNumbers{11,13,17,19};
 when(x,
     Range(1, 10),       []{ puts("x is in the range"); },
@@ -94,260 +107,110 @@ when(x,
     Else(),             []{ puts("none of the above"); }
 );
 ```
-This project tries to mock kotlin's ``when`` in C++. It may sounds stupid, but it shows how powerful ``template`` can be, yet I only used a small portition of its power.
-### Usage
-Just include the ``When/When.hpp`` header in your project.
-### Requirement
-Any compiler that supports C++17, because if would be so hard to do without ``constexpr if``(*I may consider adding support for pre C++17 if I am more advanced*)
-I also implemented the same functionality using C++20 concepts because it's cool :)
-### Example
-Example is included in ``main.cpp``. Here I copied them without the comments for a briefintuition.
-```cpp
-#include "When.hpp"
-#include "../IO/IO.hpp" //for print()
-#include <iostream>
-#include <string>
-#include <functional>
-using namespace std::literals;
-int main()
-{
-    int x = 1;
-    when(x,
-        1,          [] {puts("x==1"); },
-        2,          [] {puts("x==2"); },
-        Else(),     [] {puts("x is neither 1 nor 2"); }
-    )();//"x==1"
-    int temperature = 10;
-    print(when(temperature,
-              Range(INT_MIN, 0),    "freezing",
-              Range(1, 15),         "cold",
-              Range(16, 20),        "cool",
-              Range(21, 25),        "warm",
-              Range(26, INT_MAX),   "hot",
-              Else(),               "WTF?"
-    )); //"cold"
 
-    auto describe = [](auto &&obj) {
-        return when(obj,
-                    1,                      "One"s,
-                    "hello"s,               "Greeting"s,
-                    is<long>(),             "long"s,
-                    is_not<std::string>(),  "Not a string"s,
-                    Else(),                 "Unknown string"s);
-    };
-    print(describe(1));                   //"One"
-    print(describe("hello"s));            //"Greeting"
-    print(describe(1000l));               //"long"
-    print(describe(2));                   //"Not a string"
-    print(describe("random string"s));    //"Unknown string"
-    /*C string is also supported*/
-    auto describe2 = [](auto&& obj) {
-        return when((obj),
-            1,                              "One",
-            "hello",                        "Greeting",
-            is<long>(),                     "long",
-            is_not<const char*>(),          "Not a string",
-            Else(),                         "Unknown string");
-    };
-    print(describe2(1));                 //"One"
-    print(describe2("hello"));           //"Greeting"
-    print(describe2(1000l));             //"long"
-    print(describe2(2));                 //"Not a string"
-    print(describe2("random string"));   //"Unknown string"
-}
-```
-### Advanced Usage
-Now it supports grouped logical expression in matching branches, like ``AND, OR, NOT``.
-You can find the implementation in ``GroupedCondition.hpp``.
-An example (also included in ``main.cpp``):
-```cpp
-    auto describe = [](auto &&obj) {
-        return when((obj),    
-                    OR(1,2),                  "One or two"s,
-                    "hello"s,                   "Greeting"s,
-                    is<long>(),                 "long"s,
-                    NOT(is<std::string>()),    "Not a string"s,
-                    Else(),                     "Unknown string"s);
-    };
-    print(describe(1));                   //"One or two"
-    print(describe("hello"s));            //"Greeting"
-    print(describe(1000l));               //"long"
-    print(describe(2));                   //"Not a string"
-    print(describe("random string"s));    //"Unknown string"
-```
-### Documentation
+Although mocking Kotlin's `when` functionality in C++ may seem like a dumb
+idea, it's actually quite powerful and demonstrates the flexibility of
+`template`.
 
-<details>
-<summary>When</summary>
+#### Usage
+Just copy `When` and include `When/When.hpp` in your project.
+
+#### Requirements
+`when` requires a C++17 compatible compiler, as it uses `constexpr if`,
+a C++17 feature (although pre-C++17 support may come later). The same
+functionality is also implemented in C++20 concepts.
+
+#### Documentation
+Documentation and examples can be found in `docs/When.md` and `examples/When`.
+The examples require CMake and Make to compile.
+
+
+### Simpler IO
+IO in C++ should work how you expect it to. SugarPP's IO functions are simple
+and much more intuitive than native C++ IO. No more messing with `getchar()` and
+`getline()` nonsense, and `print()` anything!
+
+#### Features
+
+SugarPP includes two main IO convenience functions:
+
+The `input` template function is similar to Python's `input`. It prints a prompt message
+and does automatic error handling - for example, if the input is bad, it will
+clear the bad bit and re-prompt until an acceptable input is given (this behavior can
+be disabled).
+- If the type is a **primitive**, the function will work the same as `std::cin >>`
+    - If the type given is `unsigned`, `input` will automatically convert the input to an absolute value.
+- If the type is `std::string`, it will behave the same as `std::getline`, getting the whole line at once.
+
+The `print` function also behaves similar to Python's `print`; it can print any number of arguments of any type, separated by a specified delimiter (defaulting to space). SugarPP's `print` can print almost anything:
+- Anything `std::cout` has an overload for (primitives, strings, etc.)
+- Anything that is iterable (i.e. has a `.begin()`)
+    - Nested iterables work too! (at *any* depth)
+- `std::tuple` and `std::pair`
+
+`printLn` behaves similarly, but prints each argument on a new line.
+
+#### Usage
+Just copy and include `IO/IO.hpp`.
+More detailed examples can be found in `examples/IO`.
 
 ```cpp
-/*Primary templates*/
-template <typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args>
-auto when(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&& case2, Args&&... args);    //1
-
-template <typename Return1Type, typename Case2Type, typename... Args>
-auto when(const char* Expr, const char* Case1, Return1Type&& return1, Case2Type&& case2, Args&&... args);   //2
-
-template <typename ExprType, typename is_type, typename Return1Type, typename Case2Type, typename... Args>
-auto when(ExprType&& expr, is<is_type>, Return1Type&& return1, Case2Type&& case2, Args... args);            //3
-
-template <typename ExprType, typename is_not_type, typename Return1Type, typename Case2Type, typename... Args>
-auto when(ExprType&& expr, is_not<is_not_type>, Return1Type&& return1, Case2Type&& case2, Args... args);    //4
-
-/*Ending templates*/
-template <typename ExprType, typename CaseType, typename ReturnType>
-auto when(ExprType&& expr, CaseType&& to_match, ReturnType&& ReturnResult);                                 //5
-
-template <typename ReturnType>
-auto when(const char* Expr, const char* Case, ReturnType&& ReturnResult);                                   //6
-
-template <typename ExprType, typename is_type, typename ReturnType>
-auto when(ExprType&&, is<is_type>, ReturnType&& ReturnResult);                                              //7
-
-template <typename ExprType, typename is_not_type, typename ReturnType>
-auto when(ExprType&&, is_not<is_not_type>, ReturnType&& ReturnResult);                                      //8
-
-template <typename ExprType, typename ReturnType>
-auto when(ExprType&&, Else, ReturnType&& ReturnResult);                                                     //9
-```
-- 1-4 are the primary recursive templates
-   2. Specialization for ``const char*`` of ``Expression`` to match, performing ``strcmp``
-   3. Specialization for ``is<Type>``, performing type query, as if checking ``std::is_same_v<std::remove_reference_t<ExprType>, Type>``
-   4. Specialization for ``is_not<Type>``, performing type query, as if checking ``!std::is_same_v<std::remove_reference_t<ExprType>, Type>``
-- 5-8 are the ending templates which functions similarly as 1-4
-- 9 handles the ``Else`` cases and returns ``ReturnResult`` if non of the previous cases are matched described in 1-8
-
-</details>
-
-### To-DO
-- ~~Support for direct contrary operation (for example, ``!is<long>`` instead of``is_not<long>``).~~ √
-- ~~Better lambda support in matching branches~~ √
-
-## IO
-A convenient helper function for substitute ``std::cin`` that just **works as you intended.** No more ``getchar()`` for *eating* the enter key nonsense! And ``print`` anything!
-### Introduction
-The ``input`` template function is similar to ``python``. It prints a ``prompt`` message and does the following things with error handling, which means clearing any bad bit and ignores the rest of the input and can be specify to ``retry`` until the user entered the right thing. (**default is retry enabled**)
-- If the type is a primitive, it works the same as ``std::cin >>``
-    + If the type is ``unsigned`` number type, and it receives a negative number, it converts to the absolute value
-- If the type is ``std::string``, it works the same as ``std::getline``
-
-The ``print()`` function template prints **ANY** number of arguments, separated by a template argument ``delim`` (default to a space). And it's able to print almost anything:
-- anything that ``std::cout`` has an overload
-- anything that is iterable, eg. has a ``.begin()`` function, and can be printed after dereference that iterator 
-- anything that is a nested iterable(at any depth)
-- ``std::tuple``/``std::pair``
-
-Just like ``print()``, ``printLn()`` function template prints **ANY** number of arguments, one line at a time.
-### Usage
-Just include `./IO/IO.hpp`.
-### Example
-A more detailed example is in ``./IO/main.cpp``
-```cpp
-#include "IO.hpp"
+#include "IO/IO.hpp"
 int main()
 {
     print("Hello, what's your name?");
     auto name = input<std::string>("Enter your name: ");
     print("Hello,", name, "How old are you?");
     auto age = input<int>("Enter your age: ");
-    print("Thanks you,", name, "who is", age, "years old");
+    print(name, "is", age, "years old");
 
     /*print any iterable*/
     std::array arr{ 1,2,3 };
-    print(arr);//[1, 2, 3]
+    print(arr); //[1, 2, 3]
 
     /*print a tuple*/
     std::tuple t{ "SugarPP", 123, 45.6f };
-    print(t);//(SugarPP, 123, 45.6)
+    print(t); //(SugarPP, 123, 45.6)
 
     /*print any nested printable*/
     std::vector<std::vector<int>> v1{ {1,2,3}, {5,6,7,8}, {9,10} };
     std::vector<std::vector<std::vector<int>>> v2{ {{1,2,3}, {5,6,7,8}, {9,10}}, {{10,11},{12,13}, {}} };
-    printLn(v1, v2);//[[1, 2, 3], [5, 6, 7, 8], [9, 10]]...
+    printLn(v1, v2); //[[1, 2, 3], [5, 6, 7, 8], [9, 10]]...
 }
 ```
-### Documentation
-<details>
-<summary>Input</summary>
 
-```cpp
-template<typename T>
-[[nodiscard]]T input(const char* prompt = nullptr, bool retry = true);  //1
-template<typename T>
-[[nodiscard]]T input(const std::string& prompt, bool retry = true);     //2
-template<typename T>
-[[nodiscard]]T input(std::string_view prompt, bool retry = true);       //3
+#### Documentation
+Documentation can be found in `docs/IO.md`.
 
-template<>
-[[nodiscard]]std::string input(const char* prompt, bool retry = true);  //4
-template<>
-[[nodiscard]]std::string input(const std::string& prompt, bool retry);  //5
-template<>
-[[nodiscard]]std::string input(std::string_view prompt, bool retry);    //6
+### Range
+Use numerical ranges in your `for` loop!
+*Not to be confused with C++20 ranges.*
+
+Many other programming languages have a *range syntax* for iteration:
+```rust
+// e.g. in Rust
+for n in 0..10 {
+    println!(n);
+}
 ```
-- 1-3 First print a message ``prompt``, then get input from ``std::cin`` as if calling ``std::cin >> object;`` Returns the object of type ``T``. If the operation is failing, it clears the error state of ``std::cin`` and returns either a default constructed object of type ``T`` or retry the whole process if ``retry`` flag is ``true``.
-- 4-6 First print a message ``prompt``, then get input from ``std::cin`` as if calling ``std::getline``. Returns the input string. If the string is empty and ``retry`` flag is ``true``, it retry the whole process.
-</details>
-
-<details>
-<summary>Output</summary>
-
-```cpp
-template <char delim = ' ', std::ostream& os = std::cout, typename... Args>
-void print(Args &&... args);    //1
-template <std::ostream& os = std::cout, typename... Args>
-void printLn(Args &&... args);  //2
+```python
+# or in Python
+for i in range(0, 10):
+    print(i)
 ```
-1. Print any number of objects specified by the parameter pack ``args`` as if calling ``std::cout << args;``, each followed by a ``delim``. Print a new line after the call.
-2. Equivalent to ``print<'\n'>(agrs...)``
 
-</details>
+SugarPP adds support for this with the `Range` class. `Range` supports:
+- `start`, `end`, and `step (default = 1)` with a C++ foreach loop. Type will be inferred (C++17) and automatically converted if needed.
+- Multiple-dimension ranges
+- Generating a random number within the range
+- Filling a container with random numbers
 
-<details>
-<summary>Thread Safe Output</summary>
+SugarPP also has an `Enumerate` class, which accomplishes a similar task to Python's `enumerate()`; it returns an `std::pair` of the `index` and the `iterator`. It can be combined with C++17 structured binding (e.g. `for (auto [i, v]: Enumerate(array))`) for maximum effectiveness.
 
-Thread-safe output functions are ``static`` functions inside ``ThreadSafe`` class.
-```cpp
-template<std::ostream& os = std::cout>
-struct ThreadSafe
-{
-    template<char delim=' ', typename...Args>
-    static inline void print(Args&& ...args);       //1
+#### Usage
 
-    template<char delim = ' ', typename...Args>
-    static inline void tryPrint(Args&& ...args);    //2
-
-    template<typename... Args>
-    static inline void printLn(Args&&... args);     //3
-
-    template<typename... Args>
-    static inline void tryPrintLn(Args&&... args);  //4
-};
-```
-- 1,3 is the thread-safe version of `print` and ``printLn``, it blocks the current thread until it is able to print.
-- 2,4 will try to lock the internal mutex and print. If the mutex is currently locked, it immediately returns without blocking.
-
-</details>
-
-## Range
-Simplify your ``for`` loop and everything you want from a numerical range.
-*Not to be confused with C++20 ranges!*
-### Introduction
-In tons of other programming languages, there are the similar syntax as follows:
-```
-for(var i in [0..10])
-{...}
-
-for i, v in enumerate(someArray):
-    # python syntax
-```
-My ``Range`` class template suppors:
-- With sepecified ``start``, ``end`` and ``step (default = 1)``, which can be used in C++ range-based for loop. Type will be inferred (with C++17), and if there is discrepancy, will be converted to the right type
-- Generate random number in the range
-- Fill a container with random number
-
-My ``Enumerate`` class template is also used in range-based for loop. And returns a ``std::pair`` of ``index`` and an ``iterator`` from an ``iterable`` of the constructed ``Enumerate`` class. And it's better to be used together with structured-binding (C++17), eg: ``for(auto [i, v] : Enumerate(someArray))``
-### Example
+Copy `Range` and include `Range/Range.hpp` and `Range/Enumerate.hpp`.
+For more examples see `examples/Range` and `examples/Enumerate`.
 ```cpp
 #include "../IO/IO.hpp" //for print()
 #include "Range.hpp"
@@ -389,7 +252,7 @@ int main()
     print("1D range");
     for (auto i : Range(2.0, 10.0, 3))
         print(i);
-    
+
     /*
         1D range
         2
@@ -422,110 +285,8 @@ int main()
         0        2
     */
 }
-```
-### Usage
-Just include `./Range/Range.hpp` for ``Range`` and ``./Enumerate/Enumerate.hpp`` for ``Enumerate``
-### Documentation
 
-<details>
-<summary>Range</summary>
-
-#### Type
-```cpp
-class RangeRandomEngineBase
-{
-protected:
-    static inline std::mt19937 rdEngine{ std::random_device{}() };
-};
-template <typename T, typename StepType, typename ValueType = std::common_type_t<T, StepType>)
-class Range : RangeRandomEngineBase
-{   
-    /*...*/
-public:
-    using value_type = ValueType;
-    /*...*/
-}
 ```
 
-#### Constructor
-```cpp
-template<typename T, typename StepType>
-Range(T start, T end, StepType step);
-```
-Construct a ``Range`` class representing [start, end). When incremented, the ``current`` value is incremented with ``step``. Note: **according to deduction rules, ``start`` and ``end`` must have the same type.**
-
-#### Public Member functions
-```cpp 
-value_type operator*() const;
-```
-Returns the ``current`` value.
-
-```cpp
-Range<T, StepType, ValueType> begin();
-```
-Returns ``*this`` unchanged.
-
-```cpp
-value_type end();
-```
-Returns the ``end`` value.
-
-```cpp
-auto steps() const;
-```
-Returns the number of ramaining steps to go in the current ``Range``.
-
-```cpp
-bool operator!=(Range rhs) const;           //1
-bool operator!=(value_type value) const;    //2
-```
-1. Returns ``this->current`` =?= ``rhs.current``
-2. Returns ``this->current`` =?= ``value``
-
-```cpp
-template<typename Num, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
-bool operator==(Num number) const; 
-```
-Returns whether ``this->current``<=``number``<=``this->end``, only instantiated when ``number`` is a number type.
-
-
-```cpp
-Range& operator++();                //1
-Range& operator+=(unsigned steps);  //2
-```
-1. increment ``*this``
-2. increment ``*this`` ``steps`` times
-
-```cpp
-value_type rand();                                      //1
-template<typename Container>
-void fillRand(Container& container);                    //2
-template<typename Container>
-void fillRand(Container& container, size_t count);      //3
-template<typename InputIt>
-void fillRand(InputIt begin, InputIt end);              //4
-
-value_type randFast() const;                            //5
-template<typename Container>
-void fillRandFast(Container& container);                //6
-template<typename Container>
-void fillRandFast(Container& container, size_t count);  //7
-template<typename InputIt>
-void fillRandFast(InputIt begin, InputIt end);          //8
-```
-- 1-4 uses ``std::uniform_<T>_distribution`` where ``T`` is some numeric types depending on ``value_type``
-  1. Returns a single random number within [current, end)
-  2. Fill ``container`` with random numbers within [current, end)
-  3. Fill ``container`` with ``count`` random numbers within [current, end), equivalent to:
-        ```cpp
-        fillRand(std::begin(container), std::begin(container) + count)
-        ```
-  4. Fill the range pointed by the iterators [begin, end) with random numbers within [current, end)
-- 5-8 uses ``rand()`` from ``<stdlib>``, which have the same usage as 1-4
-
-#### Non Member functions
-```cpp
-friend std::ostream& operator<<(std::ostream& os, Range const& range);
-```
-Print range in the format of: ``[current,end]``
-</details>
+#### Documentation
+See `docs/Range.md`.

@@ -1,5 +1,6 @@
-#include "when.hpp"
-#include "../IO/IO.hpp"
+#include "../../When/When.hpp"
+#include "../../Range/Range.hpp"
+#include "../../IO/IO.hpp"
 #include <iostream>
 #include <string>
 #include <functional>
@@ -14,7 +15,7 @@ int main()
         1,         std::function{ [] {puts("x==1"); } },
         2,         std::function{ [] {puts("x==2"); } },
         Else(),         std::function{ [] {puts("x is neither 1 nor 2"); } }
-    )();//"x==1"
+    )(); //"x==1"
     /*Note: Must be wrapped into a callable object. Because different lambda has different type, therefore the return type is not the same */
 
     int temperature = 10;
@@ -26,7 +27,7 @@ int main()
               Range(26, INT_MAX),       "hot",
               Else(),                           "WTF?"
     )); //"cold"
-    
+
     /*Old version, using verbose std::is_same*/
     // auto describe = [](auto&& obj) {
     //     return when((obj),
@@ -38,7 +39,7 @@ int main()
     // };
 
     auto describe = [](auto &&obj) {
-        return when((obj),    
+        return when((obj),
                     OR{ 1,2 },                  "One or two"s,
                     "hello"s,                   "Greeting"s,
                     is<long>{},                 "long"s,
