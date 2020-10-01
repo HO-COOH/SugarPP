@@ -27,6 +27,13 @@ Alternatively, see [generated doxygen document here.](https://ho-cooh.github.io/
 ## Requirements
 SugarPP uses various C++17 language features thus requires a C++17 compatible compiler to use.
 
+**GCC 10.1 and older has [a known bug](https://stackoverflow.com/questions/64158484/ambiguous-call-after-adding-a-template-parameter-that-has-a-default-type), which causes issues on the overload resolution of ``detail::when_impl``, consider upgrade to GCC 10.2 or newer**
+
+Tested with:
+- GCC 10.2
+- Clang 10.0
+- Visual Studio 16.7
+
 ## Features
 
 ### Kotlin-style `when` syntax
@@ -100,7 +107,7 @@ when (x) {
 
 ```cpp
 /*SugarPP*/
-#include "Range/In.hpp"     // Range
+#include "Range/Range.hpp"     // Range
 #include "When/When.hpp"    // When
 std::array validNumbers{11,13,17,19};
 when(x,
@@ -110,6 +117,28 @@ when(x,
     Else(),             []{ puts("none of the above"); }
 );
 ```
+
+- Argument-less switches
+```kotlin
+/*kotlin*/
+when {
+    x.isOdd() ->    print("x is odd")
+    y.isEven() ->   print("y is even")
+    else ->         print("x+y is even.")
+}
+```
+
+```cpp
+/*SugarPP*/
+#include "IO/IO.hpp" //print()
+int x = 1, y = 2;
+when(
+    isOdd(x),   []{ print("x is odd"); },
+    isEven(y),  []{ print("y is even"); },
+    Else(),     []{ print("x+y is even");}
+)();//"x is odd"
+```
+Note: ``kotlin`` ``when`` is short-circuiting, which terminate at the first satisfied branch. ``SugarPP when`` has the same behavior.
 
 Although mocking Kotlin's `when` functionality in C++ may seem like a dumb
 idea, it's actually quite powerful and demonstrates the flexibility of
@@ -197,6 +226,14 @@ for n in 0..10 {
 # or in Python
 for i in range(0, 10):
     print(i)
+```
+
+In SugarPP:
+```cpp
+/*SugarPP */
+#include "Range.hpp"
+for(auto i: Range(0, 10))
+    print(i);
 ```
 
 SugarPP adds support for this with the `Range` class. `Range` supports:

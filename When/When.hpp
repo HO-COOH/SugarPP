@@ -302,7 +302,7 @@ namespace detail
         if constexpr (convertToFunction)
             return std::function{ [] {} };
         else
-            return std::remove_reference_t<ReturnType>{};
+            return std::decay_t<ReturnType>{};
     }
 
     template <bool convertToFunction = false, typename ExprType, typename is_type, typename ReturnType>
@@ -318,7 +318,7 @@ namespace detail
         if constexpr (convertToFunction)
             return std::function{ [] {} };
         else
-            return std::remove_reference_t<ReturnType>{};
+            return std::decay_t<ReturnType>{};
     }
 
     template <bool convertToFunction = false, typename ExprType, typename is_not_type, typename ReturnType>
@@ -334,7 +334,7 @@ namespace detail
         if constexpr (convertToFunction)
             return std::function{ [] {} };
         else
-            return std::remove_reference_t<ReturnType>{};
+            return std::decay_t<ReturnType>{};
     }
 
 
@@ -350,7 +350,7 @@ namespace detail
         }
         if constexpr (convertToFunction)
             return std::function{ [] {} };
-        return std::remove_reference_t<ReturnType>{};
+        return std::decay_t<ReturnType>{};
     }
 
     template <bool convertToFunction, typename ExprType, typename ReturnType>
@@ -369,7 +369,7 @@ namespace detail
     template <bool convertToFunction, typename Return1Type, typename Case2Type, typename... Args>
     auto when_impl(const char *Expr, const char *Case1, Return1Type &&return1, Case2Type &&case2, Args &&... args);
 
-    template <bool convertToFunction, typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args>
+    template <bool convertToFunction, typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args, typename = std::enable_if_t<(4 + sizeof...(Args)) % 2 != 0>>
     auto when_impl(ExprType &&expr, Case1Type &&case1, Return1Type &&return1, Case2Type &&case2, Args &&... args)
     {
         if constexpr (std::is_same_v<std::remove_reference_t<Case1Type>, bool>)
@@ -433,9 +433,48 @@ namespace detail
             else
                 return std::forward<Return1Type>(return1);
         }
-        return when_impl<convertToFunction>(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
+        else
+            return when_impl<convertToFunction>(std::forward<ExprType>(expr), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
     }
 
+    template<bool convertToFunction, typename ReturnType>
+    auto when_impl(bool Case, ReturnType&& returnResult);
+
+    template<bool convertToFunction, typename Return1Type, typename ...Args, typename = std::enable_if_t<(3 + sizeof...(Args)) % 2 == 0>>
+    auto when_impl(bool case1, Return1Type&& return1, bool case2, Args&&...args)
+    {
+        if constexpr (convertToFunction)
+        {
+            if (case1)
+                return std::function{ return1 };
+            return when_impl<convertToFunction>(case2, std::forward<Args>(args)...);
+        }
+        else
+        {
+            if (case1)
+                return return1;
+            else
+                return when_impl<convertToFunction>(case2, std::forward<Args>(args)...);
+        }
+    }
+
+    template<bool convertToFunction, typename ReturnType>
+    auto when_impl(bool Case, ReturnType&& returnResult)
+    {
+        if constexpr (convertToFunction)
+        {
+            if (Case)
+                return std::function{ returnResult };
+            return std::function{[]{}};
+        }
+        else
+        {
+            if (Case)
+                return returnResult;
+            else
+                return std::decay_t<ReturnType>{};
+        }
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -532,7 +571,7 @@ auto when(ExprType&& expr, Else dummy, ReturnType&& returnResult)
 /**
  * @brief primary recursive template
 */
-template <typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args>
+template <typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args, typename = std::enable_if_t<(4 + sizeof...(Args)) % 2 != 0>>
 auto when(ExprType&& expr, Case1Type&& case1, Return1Type&& return1, Case2Type&& case2, Args&&... args)
 {
     return detail::when_impl
@@ -594,4 +633,21 @@ auto when(ExprType&& expr, is_not<is_not_type> dummy, Return1Type&& return1, Cas
     >(std::forward<ExprType>(expr), dummy, std::forward<Return1Type>(return1), std::forward<Case2Type>(case2), std::forward<Args>(args)...);
 }
 
+template<typename Return1Type, typename ...Args, typename = std::enable_if_t<(3 + sizeof...(Args)) % 2 == 0>>
+auto when(bool case1, Return1Type&& return1, bool case2, Args&&...args)
+{
+    return detail::when_impl
+    <
+        shouldConvert
+        <
+            1, decltype(std::forward_as_tuple(case1, return1, args...))
+        >()
+    >(case1, std::forward<Return1Type>(return1), case2, std::forward<Args>(args)...);
+}
+
+template<typename ReturnType>
+auto when(bool Case, ReturnType&& returnResult)
+{
+    return detail::when_impl<false>(Case, std::forward<ReturnType>(returnResult));
+}
 #endif

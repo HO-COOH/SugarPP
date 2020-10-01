@@ -238,22 +238,22 @@ public:
     /**
      * @brief Return the end value, for support of range-based for loop
      */
-    [[nodiscard]] auto end() const { return max; }
+    [[nodiscard]] constexpr auto end() const { return max; }
 
     /**
      * @brief Return how many steps it takes from `start` -> `end`, which means `start + steps() * step` >= `end`
      */
-    [[nodiscard]] auto steps() const { return (max - current) / step + 1; }
+    [[nodiscard]] constexpr auto steps() const { return (max - current) / step + 1; }
 
     /**
      * @brief Return the span of the range, that is `max-min`
      */
-    [[nodiscard]] auto span() const { return max - current; }
+    [[nodiscard]] constexpr auto span() const { return max - current; }
 
     /**
      * @brief Return the next value of the current range object
      */
-    [[nodiscard]] auto next() const { return static_cast<value_type>(current + step); }
+    [[nodiscard]] constexpr auto next() const { return static_cast<value_type>(current + step); }
 
     /**
      * @brief Return whether `this` completely includes/contains `rhs`
@@ -269,7 +269,7 @@ public:
     /**
      * @brief Return whether the current value of `this` == `rhs`
      */
-    bool operator!=(Range rhs) const
+    constexpr bool operator!=(Range rhs) const
     {
         if constexpr (std::is_arithmetic_v<value_type>)
             return current < rhs.current;
@@ -280,7 +280,7 @@ public:
     /**
      * @brief Return whether the current value of `this` == `value`
      */
-    bool operator!=(value_type value) const
+    constexpr bool operator!=(value_type value) const
     {
         if constexpr (std::is_arithmetic_v<value_type>)
             return current < value;
