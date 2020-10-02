@@ -15,9 +15,27 @@ SugarPP is a collection of syntactic candy for C++ code.
     - [Range](#range)
       - [Usage](#usage-2)
       - [Documentation](#documentation-2)
+    - [Motivation](#motivation)
 
 ## How to Use
 SugarPP is **header only**. Just clone this repository or copy the corresponding header files you want to use.
+
+Want hassel-free? Copy this Cmake snippet to your root ``CMakeLists.txt``, to automatically clone the whole project.
+```cmake
+include(ExternalProject)
+ExternalProject_Add(
+    SugarPP
+    PREFIX ${CMAKE_BINARY_DIR}/SugarPP
+    GIT_REPOSITORY git@github.com:HO-COOH/SugarPP.git
+    UPDATE_DISCONNECTED TRUE
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+)
+ExternalProject_Get_Property(SugarPP source_dir)
+set(SugarPPIncludeDir ${source_dir})
+set(CMAKE_CXX_STANDARD 17)
+include_directories(${SugarPPIncludeDir})
+```
 
 You can find **quick** documentation for every modules in [./docs](./docs/)
 
@@ -59,12 +77,11 @@ when (x) {
 
 ```cpp
 /* SugarPP */
-#include "When/When.hpp"
 when (x,
-    1,      []{ puts("x == 1"); },
-    2,      []{ puts("x == 2"); },
-    Else(), []{ puts("x is neither 1 nor 2"); }
-);
+    1,      []{ print("x == 1"); },
+    2,      []{ print("x == 2"); },
+    Else(), []{ print("x is neither 1 nor 2"); }
+)(); //returns a function object, use () to call it
 ```
 
 - Type matching:
@@ -107,15 +124,13 @@ when (x) {
 
 ```cpp
 /*SugarPP*/
-#include "Range/Range.hpp"     // Range
-#include "When/When.hpp"    // When
 std::array validNumbers{11,13,17,19};
 when(x,
-    Range(1, 10),       []{ puts("x is in the range"); },
-    Range(validNumbers),[]{ puts("x is valid"); },
-    NOT{Range(10, 20)}, []{ puts("x is outside the range"); },
-    Else(),             []{ puts("none of the above"); }
-);
+    Range(1, 10),       []{ print("x is in the range"); },
+    Range(validNumbers),[]{ print("x is valid"); },
+    NOT{Range(10, 20)}, []{ print("x is outside the range"); },
+    Else(),             []{ print("none of the above"); }
+)();
 ```
 
 - Argument-less switches
@@ -130,19 +145,14 @@ when {
 
 ```cpp
 /*SugarPP*/
-#include "IO/IO.hpp" //print()
 int x = 1, y = 2;
 when(
     isOdd(x),   []{ print("x is odd"); },
-    isEven(y),  []{ print("y is even"); },
+    isEven(y),  []{ print("y is even"); },  
     Else(),     []{ print("x+y is even");}
 )();//"x is odd"
 ```
-Note: ``kotlin`` ``when`` is short-circuiting, which terminate at the first satisfied branch. ``SugarPP when`` has the same behavior.
-
-Although mocking Kotlin's `when` functionality in C++ may seem like a dumb
-idea, it's actually quite powerful and demonstrates the flexibility of
-`template`.
+Note: ``kotlin`` ``when`` is short-circuiting, which terminate at the first satisfied branch. ``SugarPP`` ``when`` has the same behavior.
 
 #### Usage
 Just copy [When.hpp](./When/When.hpp) and add `#include "When.hpp"` in your project.
@@ -169,9 +179,9 @@ be disabled).
 - If the type is `std::string`, it will behave the same as `std::getline`, getting the whole line at once.
 
 The `print` function also behaves similar to Python's `print`; it can print any number of arguments of any type, separated by a specified delimiter (defaulting to space). SugarPP's `print` can print almost anything:
-- Anything `std::cout` has an overload for (primitives, strings, etc.)
-- Anything that is iterable (i.e. has a `.begin()`)
-    - Nested iterables work too! (at *any* depth)
+- Anything `std::cout` has an overload for
+- Anything that is iterable (i.e. has a `.begin()` or can be called with ``std::begin``)
+- Nested iterables (at any depth)
 - `std::tuple` and `std::pair`
 
 `printLn` behaves similarly, but prints each argument on a new line.
@@ -331,3 +341,7 @@ int main()
 
 #### Documentation
 See [docs/Range.md](./docs/Range.md).
+
+-----
+### Motivation
+I had so much fun writing these and learned so much. ~~Such a great language that gives you nightmare everytime you want to add stuff. C++ itself is difficult enough, yet you realize that you can't even have a compiler to trust with when 3 different compilers (Visual studio, Clang, GCC) gives you different results.~~

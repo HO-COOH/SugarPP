@@ -368,6 +368,8 @@ namespace detail
     auto when_impl(ExprType &&expr, is<is_type>, Return1Type &&return1, Case2Type &&case2, Args &&... args);
     template <bool convertToFunction, typename Return1Type, typename Case2Type, typename... Args>
     auto when_impl(const char *Expr, const char *Case1, Return1Type &&return1, Case2Type &&case2, Args &&... args);
+    template <bool convertToFunction, typename ReturnType>
+    auto when_impl(Else, ReturnType &&returnResult);
 
     template <bool convertToFunction, typename ExprType, typename Case1Type, typename Return1Type, typename Case2Type, typename... Args, typename = std::enable_if_t<(4 + sizeof...(Args)) % 2 != 0>>
     auto when_impl(ExprType &&expr, Case1Type &&case1, Return1Type &&return1, Case2Type &&case2, Args &&... args)
@@ -475,6 +477,15 @@ namespace detail
                 return std::decay_t<ReturnType>{};
         }
     }
+
+    template<bool convertToFunction, typename ReturnType>
+    auto when_impl(Else, ReturnType &&returnResult)
+    {
+        if constexpr(convertToFunction)
+            return std::function{ returnResult };
+        else
+            return returnResult;
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -487,7 +498,10 @@ constexpr bool shouldConvert()
         return false;
     else
     {
-        const bool current = std::is_same_v<std::tuple_element_t<I, tuple_type>, std::tuple_element_t<I + 2, tuple_type>>;
+        const bool current = std::is_same_v<
+            std::remove_reference_t<std::tuple_element_t<I, tuple_type>>,
+            std::remove_reference_t<std::tuple_element_t<I + 2, tuple_type>>
+        >;
         if constexpr (I + 2 >= std::tuple_size_v<tuple_type> -1)
             return current;
         else //forget this you get 3K errors
@@ -640,14 +654,9 @@ auto when(bool case1, Return1Type&& return1, bool case2, Args&&...args)
     <
         shouldConvert
         <
-            1, decltype(std::forward_as_tuple(case1, return1, args...))
+            1, decltype(std::forward_as_tuple(case1, return1, case2 ,args...))
         >()
     >(case1, std::forward<Return1Type>(return1), case2, std::forward<Args>(args)...);
 }
 
-template<typename ReturnType>
-auto when(bool Case, ReturnType&& returnResult)
-{
-    return detail::when_impl<false>(Case, std::forward<ReturnType>(returnResult));
-}
 #endif

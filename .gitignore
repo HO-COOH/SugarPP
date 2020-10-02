@@ -5,3 +5,4 @@
 /latex
 **/build/*
 *.json
+/examples/.vs
