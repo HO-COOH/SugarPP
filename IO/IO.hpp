@@ -165,7 +165,7 @@ namespace detail
     <
         std::conditional_t
         <
-            std::is_array_v<T>,
+            std::is_array_v<std::remove_reference_t<T>>,
             T,
             std::decay_t<T>
         >
@@ -180,7 +180,9 @@ namespace detail
     template<char delim = ' ', std::ostream& os = std::cout, typename T>
     void print_impl(T&& arg)
     {
-        if constexpr (printable<T>::value)
+        if constexpr (std::is_same_v<std::decay_t<T>, bool>)
+            os << (arg ? "True" : "False");
+        else if constexpr (printable<T>::value && (std::is_same_v<std::decay_t<T>, char*> || std::is_same_v<std::decay_t<T>, const char*> || !std::is_array_v<std::remove_reference_t<T>>))
             os << arg;
         else if constexpr (is_tuple<T>::value)
         {
@@ -191,7 +193,7 @@ namespace detail
                 }, arg);
             os << '\b' << ')';
         }
-        else if constexpr (iterable<T>::value && printable<typename std::remove_reference_t<T>::value_type>::value)
+        else if constexpr (iterable<T>::value && printable<decltype(*std::begin(std::declval<T>()))>::value)
         {
             os << '[';
             bool printed = false;

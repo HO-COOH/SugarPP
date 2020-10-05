@@ -9,10 +9,18 @@ using namespace std::literals;
 int main()
 {
     int x = 10;
-    when((x),
+    when(x,
         1,         [] { puts("x==1"); },
         2,         [] { puts("x==2"); },
         Else(),    [] { puts("x is neither 1 nor 2"); })(); //"x==1"
+
+    std::array validNumbers{ 11,13,17,19 };
+    when(x,
+        Range(1, 9), [] { print("x is in the range"); },
+        Range(validNumbers), [] { print("x is valid"); },
+        NOT{ Range(10, 20) }, [] { print("x is outside the range"); },
+        Else(), [] { print("none of the above"); }
+    )();
 
     int temperature = 10;
     puts(when((temperature),

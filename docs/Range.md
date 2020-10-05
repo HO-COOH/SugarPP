@@ -1,6 +1,8 @@
 ## Range
 
-#### Type
+SugarPP su
+
+### Type
 ```cpp
 class RangeRandomEngineBase
 {
@@ -17,7 +19,7 @@ public:
 }
 ```
 
-#### Constructor
+### Constructor
 ```cpp
 template<typename T, typename StepType>
 Range(T start, T end, StepType step);
@@ -93,7 +95,7 @@ void fillRandFast(InputIt begin, InputIt end);          //8
   4. Fill the range pointed by the iterators [begin, end) with random numbers within [current, end)
 - 5-8 uses ``rand()`` from ``<stdlib>``, which have the same usage as 1-4
 
-#### Non Member functions
+### Non Member functions
 ```cpp
 friend std::ostream& operator<<(std::ostream& os, Range const& range);
 ```

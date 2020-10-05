@@ -15,7 +15,7 @@ SugarPP is a collection of syntactic candy for C++ code.
     - [Range](#range)
       - [Usage](#usage-2)
       - [Documentation](#documentation-2)
-    - [Motivation](#motivation)
+  - [Motivation](#motivation)
 
 ## How to Use
 SugarPP is **header only**. Just clone this repository or copy the corresponding header files you want to use.
@@ -183,6 +183,7 @@ The `print` function also behaves similar to Python's `print`; it can print any 
 - Anything that is iterable (i.e. has a `.begin()` or can be called with ``std::begin``)
 - Nested iterables (at any depth)
 - `std::tuple` and `std::pair`
+- ``bool`` will be printed as ``True`` or ``False``
 
 `printLn` behaves similarly, but prints each argument on a new line.
 
@@ -214,6 +215,9 @@ int main()
     std::vector<std::vector<int>> v1{ {1,2,3}, {5,6,7,8}, {9,10} };
     std::vector<std::vector<std::vector<int>>> v2{ {{1,2,3}, {5,6,7,8}, {9,10}}, {{10,11},{12,13}, {}} };
     printLn(v1, v2); //[[1, 2, 3], [5, 6, 7, 8], [9, 10]]...
+
+    /*print a bool*/
+    print(0.1 + 0.2 == 0.3); //"False", you should know why :P
 }
 ```
 
@@ -223,7 +227,7 @@ See [docs/IO.md](./docs/IO.md).
 ------------------------------------------------------------
 ### Range
 Use numerical ranges in your `for` loop!
-*Not to be confused with C++20 ranges.*
+~~Not to be confused with C++20 ranges.~~ Container Ranges are working in progress towards providing C++20 ranges functionality in C++17. 
 
 Many other programming languages have a *range syntax* for iteration:
 ```rust
@@ -246,11 +250,18 @@ for(auto i: Range(0, 10))
     print(i);
 ```
 
-SugarPP adds support for this with the `Range` class. `Range` supports:
-- `start`, `end`, and `step (default = 1)` with a C++ foreach loop. Type will be inferred and automatically converted if needed.
-- Multiple-dimension ranges
-- Generating a random number within the range
-- Filling a container with random numbers
+SugarPP defines 3 types of Ranges in some sort of "class overloading" way
+- Numerical ranges
+  - `start`, `end`, and `step (default = 1)` with a C++ foreach loop. Type will be inferred and automatically converted if needed.
+  - Multiple-dimension ranges
+  - Generating a random number within the range
+  - Filling a container with random numbers
+
+- Letter ranges
+  
+  Similar functionality with numerical ranges, but works correctly when it is incremented it skips non letter characters
+  
+- Container ranges(In progress)
 
 SugarPP also has an `Enumerate` class, which accomplishes a similar task to Python's `enumerate()`; it returns an `std::pair` of the `index` and the `iterator`. It can be combined with C++17 structured binding (e.g. `for (auto [i, v]: Enumerate(array))`) for maximum effectiveness.
 
@@ -343,5 +354,5 @@ int main()
 See [docs/Range.md](./docs/Range.md).
 
 -----
-### Motivation
+## Motivation
 I had so much fun writing these and learned so much. ~~Such a great language that gives you nightmare everytime you want to add stuff. C++ itself is difficult enough, yet you realize that you can't even have a compiler to trust with when 3 different compilers (Visual studio, Clang, GCC) gives you different results.~~

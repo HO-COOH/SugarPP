@@ -37,7 +37,7 @@ protected:
  * {unsigned shorter, signed longer} -> signed longer
  * {signed shorter, signed longer} -> signed longer
  */
-template<typename T1, typename T2, typename>
+template<typename T1, typename T2, typename = void>
 struct CommonValueType
 {
     using type = std::conditional_t          //when both are integer types
@@ -55,12 +55,20 @@ struct CommonValueType<T1, T2, std::enable_if_t<std::is_floating_point_v<T1> || 
 };
 
 
-template <typename T1,  //start
-    typename T2,        //end
-    typename T3 = int,
-    typename ValueType = typename CommonValueType<T1, T2, void>::type,
-    typename StepType = std::common_type_t<ValueType, T3>>
-    class Range;
+
+enum class RangeType
+{
+    Numeric,
+    Letter,
+    Container
+};
+
+template <
+    RangeType,
+    typename ValueType,
+    typename StepType
+>
+class Range;
 
 /**
  * @brief A multiple ranges wrapper which handles any number/type of Range objects which can be used in a range-based for loop
@@ -211,9 +219,10 @@ public:
  *      {//...}
  * ~~~~
  */
-template <typename T1, typename T2, typename T3, typename ValueType, typename StepType>
-class Range : RangeRandomEngineBase
+template <typename ValueType, typename StepType>
+class Range<RangeType::Numeric, ValueType, StepType> : RangeRandomEngineBase
 {
+protected:
     ValueType current;
     ValueType const max;
 public:
@@ -223,6 +232,7 @@ public:
      * @brief Construct a range object, where `start` is incremented by `step` until >= `end`, `end` is exclusive, meaning the last value you get is always < `end`
      * @note All parameters are expected to be arithmetic values
      */
+    template<typename T1, typename T2, typename T3 = int>
     constexpr Range(T1 start, T2 end, T3 step = 1) : current(static_cast<ValueType>(start)), max(static_cast<ValueType>(end)), step(static_cast<StepType>(step)) {}
 
     /**
@@ -441,20 +451,11 @@ public:
         std::generate(begin, end, [this] {return randFast(); });
     }
 
-    /**
-     * @brief Return whether a number is within a range
-     * @return true if number is within range, false otherwise
-    */
-    template <typename Num, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
-    friend bool operator==(Num number, Range const& rhs)
-    {
-        return (number >= rhs.current) && (number <= rhs.max);
-    }
 
     template<typename Num, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
     bool operator==(Num number) const
     {
-        return number == (*this);
+        return (number >= current) && (number <= max);
     }
 
     template<typename Num, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
@@ -486,84 +487,106 @@ public:
     }
 
 };
-namespace
+
+/**
+ * @brief Return whether a number is within a range
+ * @return true if number is within range, false otherwise
+*/
+template <typename Num, typename ValueType, typename StepType, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
+bool operator==(Num number, Range<RangeType::Numeric, ValueType, StepType> const& rhs)
 {
-    class LetterRange :public Range<char, char, int, char, int>
-    {
-    public:
-        constexpr LetterRange(char start, char end, int step = 1) :Range<char, char, int, char, int>{ start, end, step } {}
-        LetterRange& operator++()
-        {
-            Range::operator++();
-            if (*this == 'Z')
-                *this += ('a' - 'Z');
-            return *this;
-        }
-    };
+    return rhs == number;
 }
-constexpr static Range<char, char, int, char, int> UpperCaseLetters{ 'A', 'Z' + 1 };
-constexpr static Range<char, char, int, char, int> LowerCaseLetters{ 'a','z' + 1 };
-constexpr static LetterRange Letters{ 'A', 'z' + 1 };
-
-
-
-
-/*Substitute the in<Container> */
-template<typename T, typename ContainerType>
-class ContainerRangeBase;
-
-template <typename Container>
-class Range<void, void, void, Container, void> :public ContainerRangeBase<Range<void, void, void, Container, void>, Container>
+template <typename Num, typename ValueType, typename StepType, typename = std::enable_if_t<std::is_arithmetic_v<Num>>>
+bool operator!=(Num number, Range<RangeType::Numeric, ValueType, StepType> const& rhs)
 {
-    Container& range;
+    return !(rhs == number);
+}
+
+/*Deduction guides for numerical ranges*/
+template<typename T1, typename T2, typename = std::enable_if_t<std::is_arithmetic_v<T1>&& std::is_arithmetic_v<T2>>>
+Range(T1, T2)->Range<RangeType::Numeric, typename CommonValueType<T1, T2>::type, std::common_type_t<typename CommonValueType<T1, T2>::type, int>>;
+
+template<typename T1, typename T2, typename T3, typename = std::enable_if_t<std::is_arithmetic_v<T1>&& std::is_arithmetic_v<T2>>>
+Range(T1, T2, T3)->Range<RangeType::Numeric, typename CommonValueType<T1, T2>::type, std::common_type_t<typename CommonValueType<T1, T2>::type, T3>>;
+
+
+template<>
+class Range<RangeType::Letter, char, int>:public Range<RangeType::Numeric, char, int>
+{
+    
 public:
-    explicit Range(Container& container) :range(container) {}
-    Range(Container&& container) = delete;  //Another overload is necessary to handle the case when [container] is an rvalue, otherwise dangling reference
-    friend ContainerRangeBase<Range<void, void, void, Container, void>, Container>;
-    friend bool operator==(typename Container::value_type &&num, Range const &rhs)
+    constexpr Range(char start, char end, int step = 1) :Range<RangeType::Numeric, char, int>{ start, end, step } { }
+    using Range<RangeType::Numeric, char, int>::operator++;
+    [[nodiscard]] constexpr auto begin() const
     {
-        return rhs == num;
+        return *this;
+    }
+    auto& operator++()
+    {
+        Range<RangeType::Numeric, char, int>::operator++();
+        if (current == 'Z')
+            current += ('a' - 'Z');
+        return *this;
     }
 };
+using LetterRange = Range<RangeType::Letter, char, int>;
 
+/*Deduction guides for letter ranges */
+//template<typename StepType>
+//Range(char, char, StepType)->Range<RangeType::Letter, char, int>;
+
+namespace CommonRanges
+{
+    static LetterRange UpperCaseLetters{ 'A', 'Z' + 1 };
+    static LetterRange LowerCaseLetters{ 'a','z' + 1 };
+    static LetterRange Letters{ 'A', 'z' + 1 };
+}
+
+
+
+//TODO: Add ton of STL functions
 template <typename Container>
-class Range<void, void, void, Container&&, void> :public ContainerRangeBase<Range<void, void, void, Container&&, void>, Container>
+class Range<RangeType::Container, Container, long long>
 {
-    Container range;
+    Container range; //lvalue reference or value type
 public:
-    Range(Container& container) = delete;
-    explicit Range(Container &&container) : range(std::forward<Container>(container)) {} //copy the temporary
-    friend ContainerRangeBase<Range<void, void, void, Container&&, void>, Container>;
-    friend bool operator==(typename Container::value_type&& num, Range const& rhs)
-    {
-        return rhs == num;
-    }
-};
+    using value_type = typename std::remove_reference_t<Container>::value_type;
+    template<typename T>
+    explicit Range(T&& container) :range(std::forward<T>(container)) { }
 
-template<typename T, typename ContainerType>
-class ContainerRangeBase
-{
-public:
-    using value_type = typename ContainerType::value_type;
+    template <typename Func>
+    auto map(Func &&func)
+    {
+        
+    }
+
     bool operator==(value_type const& value) const
     {
-        auto&& range = static_cast<T const&>(*this).range;
         return std::find(std::cbegin(range), std::cend(range), value) != std::cend(range);
     }
+    bool operator!=(value_type const& value) const
+    {
+        return !((*this) == value);
+    }
 };
-
-
-// template<typename Range>
-// bool operator==(typename Range::value_type&& value, Range const& in)
-// {
-//     return in == value;
-// }
+template<typename Container>
+bool operator==(typename Range<RangeType::Container, Container, long long>::value_type const& num, Range<RangeType::Container, Container, long long> const& rhs)
+{
+    return rhs == num;
+}
 
 template<typename Container>
-Range(Container&)->Range<void, void, void, Container, void>;
+bool operator!=(typename Range<RangeType::Container, Container, long long>::value_type const& num, Range<RangeType::Container, Container, long long> const& rhs)
+{
+    return rhs != num;
+}
 
 template<typename Container>
-Range(Container&&)->Range<void, void, void, Container&&, void>;
+Range(Container&)->Range<RangeType::Container, Container, long long>;
+
+template<typename Container>
+Range(Container&&)->Range<RangeType::Container, Container, long long>;
 
 #include <thread>
 #include <vector>
