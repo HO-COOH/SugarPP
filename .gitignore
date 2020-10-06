@@ -5,4 +5,6 @@
 /latex
 **/build/*
 *.json
-/examples/.vs
+.idea/
+**/cmake-build-*/
+.tools/
