@@ -31,7 +31,6 @@ function(add_test)
   target_link_libraries(${target} PRIVATE SugarPP::SugarPP)
   target_compile_features(${target} PRIVATE cxx_std_17)
   target_include_directories(${target} PRIVATE "${PROJECT_SOURCE_DIR}/include")
-  set_target_properties(${target} PROPERTIES CXX_STANDARD_REQUIRED YES)
 
   # Call the original add_test
   _add_test(NAME ${test_name} COMMAND ${target})
