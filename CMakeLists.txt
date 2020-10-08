@@ -30,7 +30,7 @@ target_compile_features(SugarPP INTERFACE cxx_std_17)
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
-set(sugarpp_directory "sugarpp-${PROJECT_VERSION}")
+set(sugarpp_directory "SugarPP-${PROJECT_VERSION}")
 set(sugarpp_include_directory "${CMAKE_INSTALL_INCLUDEDIR}/${sugarpp_directory}")
 
 install(TARGETS SugarPP
