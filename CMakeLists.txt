@@ -47,11 +47,11 @@ write_basic_package_version_file(
         ARCH_INDEPENDENT)
 
 install(EXPORT SugarPPTargets
+        FILE SugarPPConfig.cmake
         NAMESPACE SugarPP::
         DESTINATION "${sugarpp_install_cmakedir}")
 
 install(FILES
-        "${PROJECT_SOURCE_DIR}/cmake/SugarPPConfig.cmake"
         "${PROJECT_BINARY_DIR}/SugarPPConfigVersion.cmake"
         DESTINATION "${sugarpp_install_cmakedir}")
 
