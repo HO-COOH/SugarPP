@@ -1,7 +1,7 @@
-#include "../../Range/Range.hpp"
-#include "../../IO/IO.hpp"
-#include "../../Range/Enumerate.hpp"
-#include "../../Range/In.hpp" //Deprecated
+#include "sugarpp/range/range.hpp"
+#include "sugarpp/io/io.hpp"
+#include "sugarpp/range/enumerate.hpp"
+#include "sugarpp/range/in.hpp" //Deprecated
 #include <iostream>
 #include <array>
 #include <iterator>
