@@ -1,0 +1,68 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+env:
+  CMAKE_VERSION: 3.18.3
+  NINJA_VERSION: 1.10.1
+  CMAKE_CONFIG_TYPE: Debug
+  CTEST_OUTPUT_ON_FAILURE: 1
+  NINJA_STATUS: '[%f/%t %o/sec] '
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-latest
+            cc: clang-10
+            cxx: clang++-10
+
+    runs-on: ${{ matrix.config.os }}
+
+    env:
+      CC: ${{ matrix.config.cc }}
+      CXX: ${{ matrix.config.cxx }}
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: friendlyanon/fetch-core-count@v1
+        id: cores
+
+      - run: cmake -E make_directory .tools
+
+      - name: Install CMake and Ninja
+        id: tools
+        working-directory: .tools
+        run: cmake -D RUNNER_OS=${{ runner.os }} -P ../cmake/ciToolsUpdate.cmake
+
+      - name: Install Clang 10
+        if: startsWith(matrix.config.os, 'ubuntu')
+        working-directory: ${{ env.HOME }}
+        run: |
+          wget --quiet https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 10 > /dev/null
+
+      - name: Build
+        run: cmake -P cmake/ciBuild.cmake -- test build/test
+          ${{ steps.tools.outputs.cmake }} ${{ steps.tools.outputs.ninja }}
+          ${{ steps.cores.outputs.plus_one }}
+
+      - name: Run
+        working-directory: build/test
+        shell: cmake -P {0}
+        run: >
+          include(../../cmake/exec.cmake)
+
+          exec(${{ steps.tools.outputs.ctest }}
+          -j ${{ steps.cores.outputs.plus_one }})

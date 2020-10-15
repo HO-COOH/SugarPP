@@ -5,4 +5,8 @@
 /latex
 **/build/*
 *.json
-/examples/.vs
+.idea/
+**/cmake-build-*/
+.tools/
+/test/.vs
+/test/Folder.DotSettings.user

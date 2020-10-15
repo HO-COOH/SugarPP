@@ -1,12 +1,10 @@
-#include "../../Range/Range.hpp"
-#include "../../IO/IO.hpp"
-#include "../../Range/Enumerate.hpp"
-#include "../../Range/In.hpp" //Deprecated
-#include <iostream>
+#include "sugarpp/range/range.hpp"
+#include "sugarpp/io/io.hpp"
+#include "sugarpp/range/enumerate.hpp"
+#include "sugarpp/range/in.hpp" //Deprecated
 #include <array>
-#include <iterator>
-#include <functional>
 
+using namespace SugarPP;
 
 int main()
 {
@@ -53,7 +51,6 @@ int main()
         for (auto [i, j] : Range(-5, 1) | Range(0, 3))
             print(i, '\t', j);
 
-        std::cin.get();
     }
     {
         std::vector<int> v(20);
@@ -79,11 +76,11 @@ int main()
         /*Range works for lvalue container*/
         std::array arr{ 1,2,3,4, 5,6 };
         /*Lame*/
-        Range{arr}.map([](auto &element) { return element * 3; });
-        /*If macro can do this */
-        Range{arr}.map([](auto &element) { => element * 3; });
-        /*Epic*/
-        Range{arr}.map(element * 3);
+        //Range{arr}.map([](auto &element) { return element * 3; });
+        ///*If macro can do this */
+        //Range{arr}.map([](auto &element) { => element * 3; });
+        ///*Epic*/
+        //Range{arr}.map(element * 3);
 
         print(3 == Range{arr});
     }

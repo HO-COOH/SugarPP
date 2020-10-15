@@ -1,10 +1,11 @@
-#include "../../When/When.hpp"
-#include "../../Range/Range.hpp"
-#include "../../IO/IO.hpp"
+#include "sugarpp/when/when.hpp"
+#include "sugarpp/range/range.hpp"
+#include "sugarpp/io/io.hpp"
 #include <iostream>
 #include <string>
 #include <climits> //for INT_MAX
 
+using namespace SugarPP;
 using namespace std::literals;
 int main()
 {

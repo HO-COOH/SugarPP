@@ -1,8 +1,10 @@
-#include "../../IO/IO.hpp"
+#include "sugarpp/io/io.hpp"
 #include <array>
 #include <iostream>
 #include <tuple>
 #include <vector>
+
+using namespace SugarPP;
 
 static void printSeparator()
 {
