@@ -8,3 +8,5 @@
 .idea/
 **/cmake-build-*/
 .tools/
+/test/.vs
+/test/Folder.DotSettings.user

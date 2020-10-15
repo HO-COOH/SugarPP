@@ -5,6 +5,7 @@
 #include <string>
 #include <climits> //for INT_MAX
 
+using namespace SugarPP;
 using namespace std::literals;
 int main()
 {

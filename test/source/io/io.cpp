@@ -4,6 +4,8 @@
 #include <tuple>
 #include <vector>
 
+using namespace SugarPP;
+
 static void printSeparator()
 {
     std::cout << "----------------------------------";

@@ -14,6 +14,8 @@ if(SugarPP_INCLUDE_WITHOUT_SYSTEM)
 endif()
 
 # ---- Declare library ----
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(SugarPP INTERFACE)
 add_library(SugarPP::SugarPP ALIAS SugarPP)
@@ -23,7 +25,13 @@ target_include_directories(SugarPP
         INTERFACE
         "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
-target_compile_features(SugarPP INTERFACE cxx_std_17)
+# target_compile_features(SugarPP INTERFACE cxx_std_17)  # makes it hard to develop because the IDE does not know to use C++17 standard
+
+option(SugarPPUseNamespace "Make SugarPP inside namespace SugarPP" ON)
+if(SugarPPUseNamespace)
+    target_compile_definitions(SugarPP INTERFACE SugarPPNamespace)
+endif()
+
 
 # ---- Install ----
 

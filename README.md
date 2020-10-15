@@ -1,5 +1,5 @@
 # SugarPP: syntactic 🍬 for programming in C++
-SugarPP is a collection of syntactic candy for C++ code.
+SugarPP is a collection of syntactic sugar for C++ code.
 
 - [SugarPP: syntactic 🍬 for programming in C++](#sugarpp-syntactic--for-programming-in-c)
   - [How to Use](#how-to-use)
@@ -18,28 +18,42 @@ SugarPP is a collection of syntactic candy for C++ code.
   - [Motivation](#motivation)
 
 ## How to Use
-SugarPP is **header only**. Just clone this repository or copy the corresponding header files you want to use.
+1. SugarPP is **header only** and **each headers are independent**. Just clone this repository go to [./include/sugarpp](./include/sugarpp) or copy the corresponding header file you want to use.
 
-Want hassel-free? Copy this Cmake snippet to your root ``CMakeLists.txt``, to automatically clone the whole project.
-```cmake
-include(ExternalProject)
-ExternalProject_Add(
-    SugarPP
-    PREFIX ${CMAKE_BINARY_DIR}/SugarPP
-    GIT_REPOSITORY git@github.com:HO-COOH/SugarPP.git
-    UPDATE_DISCONNECTED TRUE
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-)
-ExternalProject_Get_Property(SugarPP source_dir)
-set(SugarPPIncludeDir ${source_dir})
-set(CMAKE_CXX_STANDARD 17)
-include_directories(${SugarPPIncludeDir})
-```
+    Or Want hassel-free? Copy this Cmake snippet to your root ``CMakeLists.txt``, to automatically download & use this library in your project. No need to clone the project!
+    ```cmake
+    include(FetchContent)
+    FetchContent_Declare(
+        SugarPP
+        GIT_REPOSITORY https://github.com/HO-COOH/SugarPP.git
+        GIT_TAG origin/master
+    )
+    FetchContent_MakeAvailable(SugarPP)
+
+    #Use for your target
+    add_executable(<Your target> main.cpp)
+    target_link_libraries(<Your target> PRIVATE SugarPP)
+    ```
+    
+    Or want it globaly? Copy this Cmake snippet to your roor ``CMakeLists.txt``, to automatically download & use this library in your project. No need to clone the project!
+    ```cmake
+    include(FetchContent)
+    FetchContent_Declare(
+        SugarPP
+        GIT_REPOSITORY https://github.com/HO-COOH/SugarPP.git
+        GIT_TAG origin/master
+    )
+    FetchContent_MakeAvailable(SugarPP)
+
+    #Use globally
+    link_libraries(SugarPP)
+    ```
+
+2. Then add ``#include <sugarpp/xxx/xxx.hpp>``. Also **Note: Everything in SugarPP is now inside ``namespace SugarPP``!** So you may want ``using namespace SugarPP;``
 
 You can find **quick** documentation for every modules in [./docs](./docs/)
 
-You can find examples for every modules in [./examples](./examples/)
+You can find examples for every modules in [./test/source](./test/source/)
 
 Alternatively, see [generated doxygen document here.](https://ho-cooh.github.io/SugarPPDoc/html/index.html)
 ## Requirements
@@ -59,9 +73,9 @@ Tested with:
 [Kotlin](https://kotlinlang.org/) has the `when` expression for matching values,
 replacing the traditional `switch/case` in most languages.
 C/C++'s native `switch/case` has the drawback of only
-matching **integer** values; however, Kotlin's `when` can match any comparable type.
+matching **integer** values.
 
-SugarPP has its own analogue to Kotlin's `when`:
+SugarPP ``when``
 
 - Value matching (for *any comparable type*, not just integers):
 ```kotlin
@@ -98,7 +112,6 @@ fun describe(obj: Any): String =
 ```
 ```cpp
 /*SugarPP*/
-#include "When/When.hpp"
 auto describe = [](auto&& obj) {
     return when(obj,
         1,                      "One",
@@ -155,7 +168,7 @@ when(
 Note: ``kotlin`` ``when`` is short-circuiting, which terminate at the first satisfied branch. ``SugarPP`` ``when`` has the same behavior.
 
 #### Usage
-Just copy [When.hpp](./When/When.hpp) and add `#include "When.hpp"` in your project.
+Just copy [./include/sugarpp/when/when.hpp](./include/sugarpp/when/when.hpp) and add `#include "when.hpp"` in your project.
 
 #### Documentation
 See [docs/When.md](./docs/When.md) 
@@ -167,9 +180,6 @@ and much more intuitive than native C++ IO. No more messing with `getchar()` and
 `getline()` nonsense, and `print()` anything!
 
 #### Features
-
-SugarPP includes two main IO convenience functions:
-
 The `input` template function is similar to Python's `input`. It prints a prompt message
 and does automatic error handling - for example, if the input is bad, it will
 clear the bad bit and re-prompt until an acceptable input is given (this behavior can
@@ -177,6 +187,12 @@ be disabled).
 - If the type is a **primitive**, the function will work the same as `std::cin >>`
     - If the type given is `unsigned`, `input` will automatically convert the input to an absolute value.
 - If the type is `std::string`, it will behave the same as `std::getline`, getting the whole line at once.
+```cpp
+auto name = input<std::string>("Enter your name: ");
+print("Hello,", name, "How old are you?");
+auto age = input<int>("Enter your age: ");
+print(name, "is", age, "years old");
+```
 
 The `print` function also behaves similar to Python's `print`; it can print any number of arguments of any type, separated by a specified delimiter (defaulting to space). SugarPP's `print` can print almost anything:
 - Anything `std::cout` has an overload for
@@ -186,47 +202,38 @@ The `print` function also behaves similar to Python's `print`; it can print any 
 - ``bool`` will be printed as ``True`` or ``False``
 
 `printLn` behaves similarly, but prints each argument on a new line.
+```cpp
+/*print any iterable*/
+std::array arr{ 1,2,3 };
+print(arr); //[1, 2, 3]
+
+/*print a tuple*/
+std::tuple t{ "SugarPP", 123, 45.6f };
+print(t); //(SugarPP, 123, 45.6)
+
+/*print any nested printable*/
+std::vector<std::vector<int>> v1{ {1,2,3}, {5,6,7,8}, {9,10} };
+std::vector<std::vector<std::vector<int>>> v2{ {{1,2,3}, {5,6,7,8}, {9,10}}, {{10,11},{12,13}, {}} };
+printLn(v1, v2); //[[1, 2, 3], [5, 6, 7, 8], [9, 10]]...
+
+/*print a bool*/
+print(0.1 + 0.2 == 0.3); //"False", you should know why :P
+```
+
+There are additional ``ThreadSafe`` version of these functions with the same name, under ``namespace ThreadSafe``.
 
 #### Usage
-Just copy [./IO/IO.hpp](./IO/IO.hpp) and add ``#include "IO.hpp"``.
+Just copy [./include/sugarpp/io/io.hp](./include/sugarpp/io/io.hpp) and add ``#include "io.hpp"``.
 
-More examples in [./examples/IO/main.cpp](./examples/IO/main.cpp).
+More examples in [./test/source/io/io.cpp](./test/source/io/io.cpp).
 
-```cpp
-#include "IO/IO.hpp"
- 
-int main()
-{
-    print("Hello, what's your name?");
-    auto name = input<std::string>("Enter your name: ");
-    print("Hello,", name, "How old are you?");
-    auto age = input<int>("Enter your age: ");
-    print(name, "is", age, "years old");
-
-    /*print any iterable*/
-    std::array arr{ 1,2,3 };
-    print(arr); //[1, 2, 3]
-
-    /*print a tuple*/
-    std::tuple t{ "SugarPP", 123, 45.6f };
-    print(t); //(SugarPP, 123, 45.6)
-
-    /*print any nested printable*/
-    std::vector<std::vector<int>> v1{ {1,2,3}, {5,6,7,8}, {9,10} };
-    std::vector<std::vector<std::vector<int>>> v2{ {{1,2,3}, {5,6,7,8}, {9,10}}, {{10,11},{12,13}, {}} };
-    printLn(v1, v2); //[[1, 2, 3], [5, 6, 7, 8], [9, 10]]...
-
-    /*print a bool*/
-    print(0.1 + 0.2 == 0.3); //"False", you should know why :P
-}
-```
 
 #### Documentation
 See [docs/IO.md](./docs/IO.md).
 
 ------------------------------------------------------------
 ### Range
-Use numerical ranges in your `for` loop!
+Use numerical ranges to simplify your range-based `for` loop!
 ~~Not to be confused with C++20 ranges.~~ Container Ranges are working in progress towards providing C++20 ranges functionality in C++17. 
 
 Many other programming languages have a *range syntax* for iteration:
@@ -242,54 +249,48 @@ for i in range(0, 10):
     print(i)
 ```
 
-In SugarPP:
-```cpp
-/*SugarPP */
-#include "Range.hpp"
-for(auto i: Range(0, 10))
-    print(i);
-```
-
 SugarPP defines 3 types of Ranges in some sort of "class overloading" way
 - Numerical ranges
   - `start`, `end`, and `step (default = 1)` with a C++ foreach loop. Type will be inferred and automatically converted if needed.
-  - Multiple-dimension ranges
-  - Generating a random number within the range
-  - Filling a container with random numbers
-
-- Letter ranges
-  
-  Similar functionality with numerical ranges, but works correctly when it is incremented it skips non letter characters
-  
-- Container ranges(In progress)
-
-SugarPP also has an `Enumerate` class, which accomplishes a similar task to Python's `enumerate()`; it returns an `std::pair` of the `index` and the `iterator`. It can be combined with C++17 structured binding (e.g. `for (auto [i, v]: Enumerate(array))`) for maximum effectiveness.
-
-#### Usage
-
-Just copy [./Range/Range.hpp](./Range/Range.hpp) and add ``#include "Range.hpp"`` for ``Range``.
-
-Just copy [./Range/Enumerate.hpp](./Range/Enumerate.hpp) and add `#include "Enumerate.hpp"` for ``Enumerate``.
-
-More examples in [./examples/Range/main.cpp](./examples/Range/main.cpp)
-
-```cpp
-#include "../IO/IO.hpp" //for print()
-#include "Range.hpp"
-#include "Enumerate.hpp"
-int main()
-{
-    /*use Range in range-based for loop*/
-    for (auto i : Range(0, 10))
+    ```cpp
+    for (auto i : Range(2.0, 10.0, 3))
         print(i);
-
+    /*
+        1D range
+        2
+        5
+        8
+    */
+    ```
+  - Multiple-dimension ranges
+    ```cpp
+    for (auto [i, j] : Range(-5, 1) | Range(0, 3))
+        print(i, '\t', j);
+    /*
+        2D range
+        -5       0
+        -5       1
+        -5       2
+        -4       0
+        -4       1
+        -4       2
+        ...
+        0        0
+        0        1
+        0        2
+    */
+    ```
+  - Generating a random number within the range
+    ```cmake
     /*use range for a random number*/
     Range r(-1, 100000);
     print("Random number in ", r, " is ", r.rand());
 
     /*use range to generate several random numbers*/
     auto [num1, num2, num3] = Range(1, 10).rand<3>();
-
+    ```
+  - Filling a container with random numbers
+    ```cpp
     /*use range to fill a C style array*/
     double arr[10];
     Range(-500.0, 500.0).fillRand(arr);
@@ -301,54 +302,35 @@ int main()
     /*Alternatively .randFast() provides a faster way for generating random number using rand() in C*/
     int arr3[10];
     Range(-200, 300).fillRandFast(arr3);
+    ```
+- Letter ranges
+  
+  Similar functionality with numerical ranges, but works correctly when it is incremented it skips non letter characters
+  
+- Container ranges(In progress)
 
-    std::array arr{ "cpp", "sugar", "sweet" };
-    for(auto [index, string]:Enumerate(arr))
-        print<'\t'>(index, string);
-    /*
-        0       cpp
-        1       sugar
-        2       sweet
-    */
-
-    print("1D range");
-    for (auto i : Range(2.0, 10.0, 3))
-        print(i);
-
-    /*
-        1D range
-        2
-        5
-        8
-    */
-    print("2D range");
-    for (auto [i, j] : Range(-5, 1) | Range(0, 3))
-        print(i, '\t', j);
-
-    /*
-        2D range
-        -5       0
-        -5       1
-        -5       2
-        -4       0
-        -4       1
-        -4       2
-        -3       0
-        -3       1
-        -3       2
-        -2       0
-        -2       1
-        -2       2
-        -1       0
-        -1       1
-        -1       2
-        0        0
-        0        1
-        0        2
-    */
-}
-
+SugarPP also has an `Enumerate` class, which accomplishes a similar task to Python's `enumerate()`.
+```python
+# Python
+a = ["enumerate", "in", "python"]
+for i, content in enumerate(a):
+    print(i, content)
 ```
+```cpp
+/*SugarPP*/
+std::array a{"Enumerate", "in", "SugarPP"};
+for(auto [i, content] : Enumerate(a))
+    print(i, content);
+```
+
+#### Usage
+
+Just copy [./include/sugarpp/range/range.hpp](./include/sugarpp/range/range.hpp) and add ``#include "range.hpp"`` for ``Range``.
+
+Just copy [./include/sugarpp/range/enumerate.hpp](./include/sugarpp/range/enumerate.hpp) and add `#include "enumerate.hpp"` for ``Enumerate``.
+
+More examples in [./test/source/range/range.cpp](./test/source/range/range.cpp)
+
 
 #### Documentation
 See [docs/Range.md](./docs/Range.md).
