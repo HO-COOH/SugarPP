@@ -42,3 +42,4 @@ endfunction()
 
 add_test(NAMESPACE range NAME range)
 add_test(NAMESPACE when NAME when)
+add_test(NAMESPACE types NAME to_string)

@@ -173,14 +173,14 @@ namespace SugarPP
 
         template<typename T>
         struct iterable :iterable_impl
-            <
+        <
             std::conditional_t
             <
-            std::is_array_v<std::remove_reference_t<T>>,
-            T,
-            std::decay_t<T>
+                std::is_array_v<std::remove_reference_t<T>>,
+                T,
+                std::decay_t<T>
             >
-            > {};
+        > {};
 
         template<typename T, std::ostream& os = std::cout, typename = void>
         struct printable :std::false_type {};
@@ -271,7 +271,7 @@ namespace SugarPP
             std::lock_guard lock{ m };
             //((os << args << delim), ...);
             //os << '\n';
-            print<delim, os>(std::forward<Args>(args)...);
+            ::print<delim, os>(std::forward<Args>(args)...);    //Do NOT forget the scope resolution operator, it is essential here. Same for below.
         }
 
         /**
@@ -282,9 +282,7 @@ namespace SugarPP
         {
             std::unique_lock const lock{ m, std::try_to_lock_t{} };
             if (lock)
-            {
-                print<delim, os>(std::forward<Args>(args)...);
-            }
+                ::print<delim, os>(std::forward<Args>(args)...);
         }
 
         /**
@@ -294,7 +292,7 @@ namespace SugarPP
         static inline void printLn(Args&&... args)
         {
             std::lock_guard lock{ m };
-            printLn<os>(std::forward<Args>(args)...);
+            ::printLn<os>(std::forward<Args>(args)...);
         }
 
         /**
@@ -305,7 +303,7 @@ namespace SugarPP
         {
             std::unique_lock const lock{ m, std::try_to_lock_t{} };
             if (lock)
-                printLn<os>(std::forward<Args>(args)...);
+                ::printLn<os>(std::forward<Args>(args)...);
         }
     };
 
