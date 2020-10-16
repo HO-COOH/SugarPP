@@ -267,44 +267,62 @@ namespace SugarPP
          * @see ::print
          */
         template<char delim = ' ', typename...Args>
-        static inline void print(Args&& ...args)
+        static void print(Args&& ...args)
         {
             std::lock_guard lock{ m };
-            //((os << args << delim), ...);
-            //os << '\n';
-            ::print<delim, os>(std::forward<Args>(args)...);    //Do NOT forget the scope resolution operator, it is essential here. Same for below.
+#ifdef SugarPPNamespace
+            SugarPP::print<delim, os>(std::forward<Args>(args)...);
+            //This is unnecessary on MSVC/Clang-cl, but GCC/Clang will reject the code for simply using ::
+#else
+            ::print<delim, os>(std::forward<Args>(args)...);    
+#endif
         }
 
         /**
          * @brief Non-blocking version of print, which returns immediately if another thread is printing.
          */
         template<char delim = ' ', typename...Args>
-        static inline void tryPrint(Args&& ...args)
+        static void tryPrint(Args&& ...args)
         {
             std::unique_lock const lock{ m, std::try_to_lock_t{} };
             if (lock)
+#ifdef SugarPPNamespace
+                SugarPP::print<delim, os>(std::forward<Args>(args)...);
+#else
                 ::print<delim, os>(std::forward<Args>(args)...);
+#endif
+                
         }
 
         /**
          * @brief Thread-safe version of printLn, blocks until the printing is finished.
          */
         template<typename... Args>
-        static inline void printLn(Args&&... args)
+        static void printLn(Args&&... args)
         {
             std::lock_guard lock{ m };
+#ifdef SugarPPNamespace
+            SugarPP::printLn<os>(std::forward<Args>(args)...);
+#else
             ::printLn<os>(std::forward<Args>(args)...);
+#endif
+            
         }
 
         /**
          * @brief Non-blocking version of printLn, which returns immediately if another thread is printing.
          */
         template<typename... Args>
-        static inline void tryPrintLn(Args&&... args)
+        static void tryPrintLn(Args&&... args)
         {
             std::unique_lock const lock{ m, std::try_to_lock_t{} };
             if (lock)
+#ifdef SugarPPNamespace
+                SugarPP::printLn<os>(std::forward<Args>(args)...);
+#else
                 ::printLn<os>(std::forward<Args>(args)...);
+#endif
+                
         }
     };
 

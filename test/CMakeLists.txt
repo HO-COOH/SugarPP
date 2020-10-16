@@ -30,6 +30,9 @@ function(add_test)
   add_executable(${target} "source/${TEST_NAMESPACE}/${TEST_NAME}.cpp")
 
   target_link_libraries(${target} PRIVATE SugarPP::SugarPP)
+  if(UNIX)
+    target_link_libraries(${target} PRIVATE pthread)
+  endif()
   target_compile_features(${target} PRIVATE cxx_std_17)
   target_include_directories(${target} PRIVATE "${PROJECT_SOURCE_DIR}/include")
 
