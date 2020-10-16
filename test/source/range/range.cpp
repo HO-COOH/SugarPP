@@ -19,7 +19,7 @@ int main()
 
         /*use range to generate several random numbers*/
         auto [num1, num2, num3] = Range(1, 10).rand<3>();
-
+        print("Got 3 random numbers:", num1, num2, num3);
 
         /*use range to fill a C style array*/
         double arr[10];
@@ -54,7 +54,7 @@ int main()
     }
     {
         std::vector<int> v(20);
-        auto process = [](auto&& v) {print(v); };
+        auto process = [](auto&& v) { ThreadSafe<>::print(v); };
         parallel(Range(0ull, v.size()), [&](auto range)
             {
                 for (auto index : range)
