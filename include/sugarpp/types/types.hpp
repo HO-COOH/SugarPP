@@ -66,7 +66,7 @@ namespace SugarPP
             if constexpr (is_tuple<T>::value)
             {
                 os << '(';
-                std::apply([](auto&&... args)
+                std::apply([&os](auto&&... args)
                     {
                         ((os << args << delim), ...);
                     }, arg);
@@ -130,7 +130,7 @@ namespace SugarPP
             if constexpr (std::is_same_v<Char, char>)
                 return std::to_string(arg) + to_string(std::forward<Args>(args)...);
             else
-                return std::to_wstring(arg) + to_string(std::forward<Args>(args));
+                return std::to_wstring(arg) + to_string(std::forward<Args>(args)...);
         }
         else
             return std::basic_string<Char>{} + to_string(std::forward<Args>(args)...);
