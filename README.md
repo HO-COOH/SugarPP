@@ -1,5 +1,5 @@
 # SugarPP: syntactic 🍬 for programming in C++
-![Build](https://github.com/HO-COOH/CITest/workflows/ClangBuild/badge.svg)
+![Build](https://github.com/HO-COOH/SugarPP/workflows/ClangBuild/badge.svg)
 SugarPP is a collection of syntactic sugar for C++ code.
 
 - [SugarPP: syntactic 🍬 for programming in C++](#sugarpp-syntactic--for-programming-in-c)
