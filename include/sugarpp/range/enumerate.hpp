@@ -43,7 +43,6 @@ namespace SugarPP
         {
             return iter != rhs.iter;
         }
-    };
     /**
      * @brief A Python-like Enumerate object, when dereference, returns <index, content>
      * @tparam Iterable The type of the `iterable` object

@@ -182,6 +182,7 @@ namespace SugarPP
             >
         > {};
 
+
         template<typename T, std::ostream& os = std::cout, typename = void>
         struct printable :std::false_type {};
 
