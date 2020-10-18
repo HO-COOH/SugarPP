@@ -1,7 +1,5 @@
 ## Range
 
-SugarPP su
-
 ### Type
 ```cpp
 class RangeRandomEngineBase

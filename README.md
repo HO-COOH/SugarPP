@@ -1,5 +1,6 @@
 # SugarPP: syntactic 🍬 for programming in C++
 ![Build](https://github.com/HO-COOH/SugarPP/workflows/ClangBuild/badge.svg)
+
 SugarPP is a collection of syntactic sugar for C++ code.
 
 - [SugarPP: syntactic 🍬 for programming in C++](#sugarpp-syntactic--for-programming-in-c)
@@ -14,8 +15,12 @@ SugarPP is a collection of syntactic sugar for C++ code.
       - [Usage](#usage-1)
       - [Documentation](#documentation-1)
     - [Range](#range)
+    - [Features](#features-2)
       - [Usage](#usage-2)
       - [Documentation](#documentation-2)
+    - [Types conversion](#types-conversion)
+      - [Features](#features-3)
+      - [Usage](#usage-3)
   - [Motivation](#motivation)
 
 ## How to Use
@@ -249,7 +254,7 @@ for n in 0..10 {
 for i in range(0, 10):
     print(i)
 ```
-
+### Features
 SugarPP defines 3 types of Ranges in some sort of "class overloading" way
 - Numerical ranges
   - `start`, `end`, and `step (default = 1)` with a C++ foreach loop. Type will be inferred and automatically converted if needed.
@@ -335,6 +340,37 @@ More examples in [./test/source/range/range.cpp](./test/source/range/range.cpp)
 
 #### Documentation
 See [docs/Range.md](./docs/Range.md).
+
+-----
+### Types conversion
+
+#### Features
+- To & from string
+  + -> number
+    
+    Admit it, ``atoi()``, ``atof()``, ``wcstold()``, ``strtof()`` are some of the ugliest function name in C, and C++ makes it worse by adding more obsecure names like ``std::stoi()``, ``std::stolld()``. That's why SugarPP provides a uniform way of getting numbers from string, which is ``SugarPP::to_num<Type>()``, which accepts both normal string and wide-string.
+    ```cpp
+    /*SugarPP*/
+    auto str1 = "42";
+    auto num1 = to_num<int>(str1);
+
+    auto str2 = "3.14159";
+    auto num2 = to_num<double>(str2);
+    ```
+  + -> string
+    
+    Isn't it wired that something printable can't be converted to string? Isn't it wired that there is a ``std::to_string()`` only works for numerical values?
+    ``SugarPP::to_string`` not only works anything that has can be called with ``std::to_string()`` but also anything that is printable. And you can also specify whether it's normal character or wide-character using one template argument.
+    ```cpp
+    auto f_str = to_string(23.43);
+
+    std::ostream& operator<<(std::ostream& os, const MyPrintableClass&);
+    auto my_class_str = to_string(my_printable);
+    ```
+#### Usage
+Just copy [./include/sugarpp/types/types.hpp](./include/sugarpp/types/types.hpp) and add ``#include "types.hpp"``.
+
+More example in [./test/source/types/to_string.cpp](./test/source/types/to_string.cpp)
 
 -----
 ## Motivation
