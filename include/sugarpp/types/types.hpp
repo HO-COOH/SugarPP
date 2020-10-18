@@ -66,7 +66,7 @@ namespace SugarPP
             if constexpr (is_tuple<T>::value)
             {
                 os << '(';
-                std::apply([&os](auto&&... args)
+                std::apply([&os, delim](auto&&... args)
                     {
                         ((os << args << delim), ...);
                     }, arg);
