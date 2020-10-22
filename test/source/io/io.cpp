@@ -57,4 +57,10 @@ int main()
 
     /*print a bool*/
     print(0.1 + 0.2 == 0.3);
+
+    /*read a file as string and print the string*/
+    print(file_to_string( "../../../source/io./io.cpp"));
+
+    /*read a file as vector<char> and print the vector*/
+    print(file_to_vec("../../../source/io./io.cpp"));
 }

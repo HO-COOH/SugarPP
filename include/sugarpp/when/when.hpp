@@ -17,6 +17,26 @@
 namespace SugarPP
 {
 #endif
+
+    /**
+     * @brief A dummy struct that defines an operator==, which returns true conditionlessly
+     */
+    struct Anything
+    {
+    };
+    template<typename T>
+    constexpr bool operator==(Anything, const T&)
+    {
+        return true;
+    }
+    template<typename T>
+    constexpr bool operator==(const T&, Anything)
+    {
+        return true;
+    }
+
+    constexpr inline Anything _;
+
     /**
      * @brief Type traits for determining whether two types can be compared with an equal operator
      * @tparam lhsType Type of Left-hand-side
@@ -497,6 +517,7 @@ namespace SugarPP
     constexpr bool shouldConvert()
     {
         using tuple_type = Tuple;
+        //Reference to different length arrays should not be considered as different type in this case, thus don't convert to function
         if constexpr (std::is_array_v<std::remove_reference_t<std::tuple_element_t<I, tuple_type>>>)
             return false;
         else
@@ -506,7 +527,7 @@ namespace SugarPP
                 std::remove_reference_t<std::tuple_element_t<I + 2, tuple_type>>
             >;
             if constexpr (I + 2 >= std::tuple_size_v<tuple_type> -1)
-                return current;
+                return !current;
             else //forget this you get 3K errors
                 return !(current && shouldConvert<I + 2, Tuple>());
         }
@@ -593,11 +614,11 @@ namespace SugarPP
     {
         return detail::when_impl
             <
-            shouldConvert
-            <
-            2,
-            decltype(std::forward_as_tuple(expr, case1, return1, case2, args...))
-            >()
+                shouldConvert
+                <
+                    2,
+                    decltype(std::forward_as_tuple(expr, case1, return1, case2, args...))
+                >()
             >(std::forward<ExprType>(expr),
                 std::forward<Case1Type>(case1),
                 std::forward<Return1Type>(return1),

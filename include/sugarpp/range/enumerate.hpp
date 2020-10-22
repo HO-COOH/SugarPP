@@ -67,7 +67,7 @@ namespace SugarPP
         auto begin() { return EnumerateIterator{ std::begin(iterable), index }; }
 
         /**
-         * @return Return an EnumerateIterator object, that points to the start of the `iterable`
+         * @return Return an EnumerateIterator object, that points to the end of the `iterable`
          */
         auto end() { return EnumerateIterator{ std::end(iterable), index }; }
     };

@@ -10,12 +10,13 @@ SugarPP is a collection of syntactic sugar for C++ code.
     - [Kotlin-style `when` syntax](#kotlin-style-when-syntax)
       - [Usage](#usage)
       - [Documentation](#documentation)
+      - [Read More](#read-more)
     - [Simpler IO](#simpler-io)
       - [Features](#features-1)
       - [Usage](#usage-1)
       - [Documentation](#documentation-1)
     - [Range](#range)
-    - [Features](#features-2)
+      - [Features](#features-2)
       - [Usage](#usage-2)
       - [Documentation](#documentation-2)
     - [Types conversion](#types-conversion)
@@ -173,11 +174,32 @@ when(
 ```
 Note: ``kotlin`` ``when`` is short-circuiting, which terminate at the first satisfied branch. ``SugarPP`` ``when`` has the same behavior.
 
+- Pattern matching
+
+Kotlin doesn't seems to support ``_`` as a place holder.
+```cpp
+/*SugarPP*/
+for(auto i:Range(1, 101))
+{
+    when(std::tuple{ i % 3, i % 5 },
+        std::tuple{ 0, 0 }, [] { print("fizzbuzz"); },
+        std::tuple{ 0, _ }, [] { print("fizz"); },
+        std::tuple{ _, 0 }, [] { print("buzz"); },
+        Else(),             [i] { print(i); }
+    )();
+}
+```
+
 #### Usage
 Just copy [./include/sugarpp/when/when.hpp](./include/sugarpp/when/when.hpp) and add `#include "when.hpp"` in your project.
 
 #### Documentation
 See [docs/When.md](./docs/When.md) 
+
+#### Read More
+At the time of writing this library, I was not aware of the [C++23 pattern matching proposal](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r3.pdf). And yes, ``SugarPP::when`` will have performance penality compared with what can be done with ``switch-case`` statement. ``SugarPP::when`` works as recursively comparing the condition to each branch, so I am not sure whether this has performance penalty compared with the pattern matching proposal. 
+
+As I am still an early learner, I will update this part to give you more insight. You can find the original implementation of that proposal [here](https://github.com/mpark/patterns)
 
 -------------------------------------------------------------------------
 ### Simpler IO
@@ -254,7 +276,7 @@ for n in 0..10 {
 for i in range(0, 10):
     print(i)
 ```
-### Features
+#### Features
 SugarPP defines 3 types of Ranges in some sort of "class overloading" way
 - Numerical ranges
   - `start`, `end`, and `step (default = 1)` with a C++ foreach loop. Type will be inferred and automatically converted if needed.
@@ -262,7 +284,6 @@ SugarPP defines 3 types of Ranges in some sort of "class overloading" way
     for (auto i : Range(2.0, 10.0, 3))
         print(i);
     /*
-        1D range
         2
         5
         8
@@ -273,7 +294,6 @@ SugarPP defines 3 types of Ranges in some sort of "class overloading" way
     for (auto [i, j] : Range(-5, 1) | Range(0, 3))
         print(i, '\t', j);
     /*
-        2D range
         -5       0
         -5       1
         -5       2
@@ -287,7 +307,7 @@ SugarPP defines 3 types of Ranges in some sort of "class overloading" way
     */
     ```
   - Generating a random number within the range
-    ```cmake
+    ```cpp
     /*use range for a random number*/
     Range r(-1, 100000);
     print("Random number in ", r, " is ", r.rand());
@@ -315,7 +335,7 @@ SugarPP defines 3 types of Ranges in some sort of "class overloading" way
   
 - Container ranges(In progress)
 
-SugarPP also has an `Enumerate` class, which accomplishes a similar task to Python's `enumerate()`.
+SugarPP also has an `Enumerate` class, which returns a pair of index (default to start at 0) and a reference to the content of iterable, similar to Python's `enumerate()`.
 ```python
 # Python
 a = ["enumerate", "in", "python"]

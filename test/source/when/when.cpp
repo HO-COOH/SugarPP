@@ -9,12 +9,14 @@ using namespace SugarPP;
 using namespace std::literals;
 int main()
 {
+    /*Value matching*/
     int x = 10;
     when(x,
         1,         [] { puts("x==1"); },
         2,         [] { puts("x==2"); },
         Else(),    [] { puts("x is neither 1 nor 2"); })(); //"x==1"
 
+    /*Range matching*/
     std::array validNumbers{ 11,13,17,19 };
     when(x,
         Range(1, 9), [] { print("x is in the range"); },
@@ -32,6 +34,7 @@ int main()
              Range(26, INT_MAX),   "hot",
              Else(),               "WTF?")); //"cold"
 
+    /*Type matching*/
     auto describe = [](auto &&obj) {
         return detail::when_impl<false>(obj,
                     OR{1, 2},               "One or two"s,
@@ -61,6 +64,7 @@ int main()
     puts(describe2(2));               //"Not a string"
     puts(describe2("random string")); //"Unknown string"
 
+    /*Argument-less switches*/
     auto isWhat = [](auto&& c) { print(when(
        static_cast<bool>(isdigit(c)), "is digits",
        static_cast<bool>(isalpha(c)), "is character",
@@ -71,6 +75,8 @@ int main()
     isWhat(' ');
     isWhat('\0');
 
+
+    /*Argument-less switches */
     auto isOdd = [](auto&& num) {return num % 2 != 0; };
     auto isEven = [](auto&& num) {return num % 2 == 0; };
     auto y = 1;
@@ -80,4 +86,34 @@ int main()
         isEven(z), [] {print("z is even"); },
         Else(), [] {print("y+z is even"); }
     )();    //"y is odd"
+
+
+    /*Fizzbuzz example*/
+    for(auto i:Range(1, 101))
+    {
+        when(std::tuple{ i % 3, i % 5 },
+            std::tuple{ 0, 0 }, [] {print("fizzbuzz"); },
+            std::tuple{ 0, _ }, [] {print("fizz"); },
+            std::tuple{ _, 0 }, [] {print("buzz"); },
+            Else(),             [i] {print(i); }
+        )();
+
+
+        /*This doesn't work because it's impossible for passing {...} to std::tuple to deduce the type */
+        //when({ i % 3, i % 5 },
+        //    { 0, 0 }, [] {print("fizzbuzz"); },
+        //    { 0, _ }, [] {print("fizz"); },
+        //    { _, 0 }, [] {print("buzz"); },
+        //    Else(),   [i] {print(i); }
+        //)();
+
+        /*This doesn't work for two reasons, the same as above and the return type is not consistent, eg: const char* vs int */
+        //print(
+        //    when({ i % 3, i % 5 },
+        //    { 0, 0 }, "fizzbuzz",
+        //    { 0, _ }, "fizz",
+        //    { _, 0 }, "buzz",
+        //    Else(),   i 
+        //));
+    }
 }

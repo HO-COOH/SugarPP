@@ -40,9 +40,26 @@ function(add_test)
   _add_test(NAME ${test_name} COMMAND ${target})
 endfunction()
 
+function(add_non_test)
+  cmake_parse_arguments(TEST "" "NAMESPACE;NAME" "" ${ARGN})
+
+  set(target "${TEST_NAMESPACE}_${TEST_NAME}")
+  set(test_name "${TEST_NAMESPACE}.${TEST_NAME}")
+
+  add_executable(${target} "source/${TEST_NAMESPACE}/${TEST_NAME}.cpp")
+
+  target_link_libraries(${target} PRIVATE SugarPP::SugarPP)
+  if(UNIX)
+    target_link_libraries(${target} PRIVATE pthread)
+  endif()
+  target_compile_features(${target} PRIVATE cxx_std_17)
+  target_include_directories(${target} PRIVATE "${PROJECT_SOURCE_DIR}/include")
+endfunction()
+
 # This just reads from stdin, can't test that
 # add_test(NAMESPACE io NAME io)
 
 add_test(NAMESPACE range NAME range)
 add_test(NAMESPACE when NAME when)
 add_test(NAMESPACE types NAME to_string)
+add_non_test(NAMESPACE io NAME io)

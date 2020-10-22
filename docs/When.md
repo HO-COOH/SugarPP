@@ -45,6 +45,14 @@ auto when(Else, ReturnType &&returnResult);                                     
 - 10 handles the ``Else`` cases and returns ``ReturnResult`` if non of the previous cases are matched described in 1-9
 - 11 handles the ``Else`` cases of argument-less ``when`` similar to ``10``
 
+## Globals
+```cpp
+struct _Anything
+{};
+constexpr inline _Anything _;
+```
+Which defines ``operator==`` and returns true conditionlessly as a place-holder for supporting pattern matching.
+
 ## !Important Node!
 Because in C++, you have to return the same time from a function, and because lambda expressions are unique types, I did a little trick to get it done. Basically I check if the returned objects are not the same type and are not arrays, ``when`` will return a ``std::function`` object to wrap up the lambdas.
 

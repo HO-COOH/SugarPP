@@ -12,11 +12,12 @@
 #include <string>
 #include <tuple>
 #include <fstream>
-#include <filesystem>
 #include <mutex>
+#include <vector>
 
 #if __cplusplus >= 201703L
 #include <string_view>
+#include <filesystem>
 #endif
 
 #ifdef SugarPPNamespace
@@ -326,6 +327,10 @@ namespace SugarPP
         }
     };
 
+    struct FileIOError:std::runtime_error
+    {
+        FileIOError(const char* const fileName):std::runtime_error(std::string{fileName}+" causes a file IO error"){}
+    };
 
     template<typename Char = char>
     class FileIterator
@@ -355,6 +360,84 @@ namespace SugarPP
         }
 
     };
+
+    /**
+     * @brief Read a whole file into a long string
+     * @param fname The input file name
+     * @tparam Char The type of char of the returned string, can be either char or wchar_t
+     * @tparam EnableException To throw an IO exception or not during the operation
+     * @return A std::basic_string<Char> which contains the original content of the file
+     * @details Will construct a std::filesystem::path object to detect whether the file exist or not in C++17
+     */
+    template<bool EnableException = false, typename Char = char>
+    auto file_to_string(const char* fname)
+    {
+#if __cplusplus >= 201703L
+        if constexpr (EnableException)
+        {
+            if (std::filesystem::directory_entry{ fname }.exists())
+            {
+                std::basic_ifstream<Char> fs{ fname };
+                if (fs.is_open())
+                    return std::basic_string<Char>(std::istreambuf_iterator<Char>{fs}, std::istreambuf_iterator<Char>{});
+            }
+            else
+                throw FileIOError{ fname };
+        }
+        else
+        {
+            std::basic_ifstream<Char> fs{ fname };
+            return std::basic_string<Char>(std::istreambuf_iterator<Char>{fs}, std::istreambuf_iterator<Char>{});
+        }
+#else
+        std::basic_ifstream<Char> fs{ fname };
+        if constexpr (EnableException)
+        {
+            if (!fs.is_open())
+                throw FileIOError{ fname };
+        }
+        return std::basic_string<Char>(std::istreambuf_iterator<Char>{fs}, std::istreambuf_iterator<Char>{});
+#endif
+    }
+
+    /**
+     * @brief Read a whole file into a std::vector<Char>
+     * @param fname The input file name
+     * @tparam Char The type of char of the returned vector, can be either char or wchar_t
+     * @tparam EnableException To throw an IO exception or not during the operation
+     * @return A std::vector<Char> which contains the original content of the file
+     * @details Will construct a std::filesystem::path object to detect whether the file exist or not in C++17
+     */
+    template<bool EnableException=false, typename Char=char>
+    auto file_to_vec(const char* fname)
+    {
+#if __cplusplus >= 201703L
+        if constexpr (EnableException)
+        {
+            if (std::filesystem::directory_entry{ fname }.exists())
+            {
+                std::basic_ifstream<Char> fs{ fname };
+                if (fs.is_open())
+                    return std::vector<Char>(std::istreambuf_iterator<Char>{fs}, std::istreambuf_iterator<Char>{});
+            }
+            else
+                throw FileIOError{ fname };
+        }
+        else
+        {
+            std::basic_ifstream<Char> fs{ fname };
+            return std::vector<Char>(std::istreambuf_iterator<Char>{fs}, std::istreambuf_iterator<Char>{});
+        }
+#else
+        std::basic_ifstream<Char> fs{ fname };
+        if constexpr (EnableException)
+        {
+            if (!fs.is_open())
+                throw FileIOError{ fname };
+        }
+        return std::vector<Char>(std::istreambuf_iterator<Char>{fs}, std::istreambuf_iterator<Char>{});
+#endif
+    }
 
 #ifdef SugarPPNamespace
 }
