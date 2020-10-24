@@ -14,6 +14,7 @@
 #include <fstream>
 #include <mutex>
 #include <vector>
+#include <typeinfo>     //for typeid().name
 
 #if __cplusplus >= 201703L
 #include <string_view>
@@ -193,8 +194,10 @@ namespace SugarPP
         template<char delim = ' ', std::ostream& os = std::cout, typename T>
         void print_impl(T&& arg)
         {
+            /*If it's bool, print as "True" / "False" */
             if constexpr (std::is_same_v<std::decay_t<T>, bool>)
                 os << (arg ? "True" : "False");
+            /*Not bool, but printable, can be const char[], */
             else if constexpr (printable<T>::value && (std::is_same_v<std::decay_t<T>, char*> || std::is_same_v<std::decay_t<T>, const char*> || !std::is_array_v<std::remove_reference_t<T>>))
                 os << arg;
             else if constexpr (is_tuple<T>::value)
@@ -228,7 +231,7 @@ namespace SugarPP
                 os << ']';
             }
             else
-                os << '?';
+                os << '<' << typeid(T).name() << '>';
         }
     }
 

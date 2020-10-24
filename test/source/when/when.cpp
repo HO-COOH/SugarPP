@@ -16,7 +16,7 @@ int main()
         2,         [] { puts("x==2"); },
         Else(),    [] { puts("x is neither 1 nor 2"); })(); //"x==1"
 
-    /*Range matching*/
+    /////*Range matching*/
     std::array validNumbers{ 11,13,17,19 };
     when(x,
         Range(1, 9), [] { print("x is in the range"); },
@@ -25,6 +25,7 @@ int main()
         Else(), [] { print("none of the above"); }
     )();
 
+    ///*Range matching*/
     int temperature = 10;
     puts(when((temperature),
              Range(INT_MIN, 0),    "freezing",
@@ -34,7 +35,7 @@ int main()
              Range(26, INT_MAX),   "hot",
              Else(),               "WTF?")); //"cold"
 
-    /*Type matching*/
+    ///*Type matching*/
     auto describe = [](auto &&obj) {
         return detail::when_impl<false>(obj,
                     OR{1, 2},               "One or two"s,
