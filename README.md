@@ -25,9 +25,9 @@ SugarPP is a collection of syntactic sugar for C++ code.
   - [Motivation](#motivation)
 
 ## How to Use
-1. SugarPP is **header only** and **each headers are independent**. Just clone this repository go to [./include/sugarpp](./include/sugarpp) or copy the corresponding header file you want to use.
+1. SugarPP is **header only** and **each header file is independent**. Just clone this repository and go to [./include/sugarpp](./include/sugarpp) or copy the corresponding header file you want to use.
 
-    Or Want hassel-free? Copy this Cmake snippet to your root ``CMakeLists.txt``, to automatically download & use this library in your project. No need to clone the project!
+    Or, for a hassle free installation, copy this Cmake snippet to your root ``CMakeLists.txt`` to automatically download & use this library in your project. No need to clone the project manually!
     ```cmake
     include(FetchContent)
     FetchContent_Declare(
@@ -41,8 +41,8 @@ SugarPP is a collection of syntactic sugar for C++ code.
     add_executable(<Your target> main.cpp)
     target_link_libraries(<Your target> PRIVATE SugarPP)
     ```
-    
-    Or want it globaly? Copy this Cmake snippet to your roor ``CMakeLists.txt``, to automatically download & use this library in your project. No need to clone the project!
+
+    Want to use the library globally? Copy this Cmake snippet to your roor ``CMakeLists.txt``, to automatically download & use this library in your project. No need to clone the project!
     ```cmake
     include(FetchContent)
     FetchContent_Declare(
@@ -64,9 +64,9 @@ You can find examples for every modules in [./test/source](./test/source/)
 
 Alternatively, see [generated doxygen document here.](https://ho-cooh.github.io/SugarPPDoc/html/index.html)
 ## Requirements
-SugarPP uses various C++17 language features thus requires a C++17 compatible compiler to use.
+SugarPP uses various C++17 language features; thus, it requires a C++17 compatible compiler to use.
 
-**GCC 10.1 and older has [a known bug](https://stackoverflow.com/questions/64158484/ambiguous-call-after-adding-a-template-parameter-that-has-a-default-type), which causes issues on the overload resolution of ``detail::when_impl``, consider upgrade to GCC 10.2 or newer**
+**GCC 10.1 and older has [a known bug](https://stackoverflow.com/questions/64158484/ambiguous-call-after-adding-a-template-parameter-that-has-a-default-type), which causes issues on the overload resolution of ``detail::when_impl``; consider upgrading to GCC 10.2 or newer**
 
 Tested with:
 - GCC 10.2
@@ -168,11 +168,11 @@ when {
 int x = 1, y = 2;
 when(
     isOdd(x),   []{ print("x is odd"); },
-    isEven(y),  []{ print("y is even"); },  
+    isEven(y),  []{ print("y is even"); },
     Else(),     []{ print("x+y is even");}
 )();//"x is odd"
 ```
-Note: ``kotlin`` ``when`` is short-circuiting, which terminate at the first satisfied branch. ``SugarPP`` ``when`` has the same behavior.
+Note: Unlike C/C++ switch-case, ``kotlin`` ``when`` is short-circuiting; the logic terminates at the first satisfied branch. ``SugarPP`` ``when`` has the same behavior.
 
 - Pattern matching
 
@@ -194,10 +194,10 @@ for(auto i:Range(1, 101))
 Just copy [./include/sugarpp/when/when.hpp](./include/sugarpp/when/when.hpp) and add `#include "when.hpp"` in your project.
 
 #### Documentation
-See [docs/When.md](./docs/When.md) 
+See [docs/When.md](./docs/When.md)
 
 #### Read More
-At the time of writing this library, I was not aware of the [C++23 pattern matching proposal](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r3.pdf). And yes, ``SugarPP::when`` will have performance penality compared with what can be done with ``switch-case`` statement. ``SugarPP::when`` works as recursively comparing the condition to each branch, so I am not sure whether this has performance penalty compared with the pattern matching proposal. 
+At the time of writing this library, I was not aware of the [C++23 pattern matching proposal](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2020/p1371r3.pdf). And yes, ``SugarPP::when`` will have performance penality compared with what can be done with ``switch-case`` statement. ``SugarPP::when`` works as recursively comparing the condition to each branch, so I am not sure whether this has performance penalty compared with the pattern matching proposal.
 
 As I am still an early learner, I will update this part to give you more insight. You can find the original implementation of that proposal [here](https://github.com/mpark/patterns)
 
@@ -248,7 +248,7 @@ printLn(v1, v2); //[[1, 2, 3], [5, 6, 7, 8], [9, 10]]...
 print(0.1 + 0.2 == 0.3); //"False", you should know why :P
 ```
 
-There are additional ``ThreadSafe`` version of these functions with the same name, under ``namespace ThreadSafe``.
+There are additional ``ThreadSafe`` versions of these functions with the same name, under ``namespace ThreadSafe``.
 
 #### Usage
 Just copy [./include/sugarpp/io/io.hp](./include/sugarpp/io/io.hpp) and add ``#include "io.hpp"``.
@@ -262,7 +262,7 @@ See [docs/IO.md](./docs/IO.md).
 ------------------------------------------------------------
 ### Range
 Use numerical ranges to simplify your range-based `for` loop!
-~~Not to be confused with C++20 ranges.~~ Container Ranges are working in progress towards providing C++20 ranges functionality in C++17. 
+~~Not to be confused with C++20 ranges.~~ Container Ranges are working in progress towards providing C++20 ranges functionality in C++17.
 
 Many other programming languages have a *range syntax* for iteration:
 ```rust
@@ -330,9 +330,9 @@ SugarPP defines 3 types of Ranges in some sort of "class overloading" way
     Range(-200, 300).fillRandFast(arr3);
     ```
 - Letter ranges
-  
+
   Similar functionality with numerical ranges, but works correctly when it is incremented it skips non letter characters
-  
+
 - Container ranges(In progress)
 
 SugarPP also has an `Enumerate` class, which returns a pair of index (default to start at 0) and a reference to the content of iterable, similar to Python's `enumerate()`.
@@ -362,13 +362,13 @@ More examples in [./test/source/range/range.cpp](./test/source/range/range.cpp)
 See [docs/Range.md](./docs/Range.md).
 
 -----
-### Types conversion
+### Type conversion
 
 #### Features
 - To & from string
   + -> number
-    
-    Admit it, ``atoi()``, ``atof()``, ``wcstold()``, ``strtof()`` are some of the ugliest function name in C, and C++ makes it worse by adding more obsecure names like ``std::stoi()``, ``std::stolld()``. That's why SugarPP provides a uniform way of getting numbers from string, which is ``SugarPP::to_num<Type>()``, which accepts both normal string and wide-string.
+
+    Admit it, ``atoi()``, ``atof()``, ``wcstold()``, ``strtof()`` are some of the ugliest function name in C, and C++ makes it worse by adding more obsecure names like ``std::stoi()``, ``std::stolld()``. That's why SugarPP provides a uniform way of getting numbers from string, which is ``SugarPP::to_num<Type>()``, which accepts both normal strings and wide-strings.
     ```cpp
     /*SugarPP*/
     auto str1 = "42";
@@ -378,9 +378,9 @@ See [docs/Range.md](./docs/Range.md).
     auto num2 = to_num<double>(str2);
     ```
   + -> string
-    
+
     Isn't it wired that something printable can't be converted to string? Isn't it wired that there is a ``std::to_string()`` only works for numerical values?
-    ``SugarPP::to_string`` not only works anything that has can be called with ``std::to_string()`` but also anything that is printable. And you can also specify whether it's normal character or wide-character using one template argument.
+    ``SugarPP::to_string`` not only works with anything that can be converted with ``std::to_string()``, but also anything that is printable. Additionally, you can also specify whether it's normal character or wide-character using one template argument.
     ```cpp
     auto f_str = to_string(23.43);
 
