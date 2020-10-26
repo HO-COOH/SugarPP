@@ -1,9 +1,9 @@
 #include "sugarpp/when/when.hpp"
 #include "sugarpp/range/range.hpp"
 #include "sugarpp/io/io.hpp"
-#include <iostream>
 #include <string>
 #include <climits> //for INT_MAX
+#include <memory>
 
 using namespace SugarPP;
 using namespace std::literals;
@@ -117,4 +117,18 @@ int main()
         //    Else(),   i 
         //));
     }
+
+    /*Polymorphism type matching*/
+    struct Shape { virtual ~Shape() = default; };
+    struct Circle :Shape {};
+    struct Square :Shape{};
+
+    std::unique_ptr<Shape> pt{ new Circle{} };
+    when(*pt,
+        is_actually<Circle>{}, [] { print("Circle* pt"); },
+        is_actually<Square>{}, [] { print("Square* pt"); },
+        Else(),                [] { print("Unknown type"); }
+    )();    //"Circle* pt"
+
+    std::cin.get();
 }

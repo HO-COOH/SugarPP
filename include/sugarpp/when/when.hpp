@@ -12,6 +12,7 @@
 #include <cstring>  //for strcmp()
 #include <utility>
 #include <functional>
+#include <memory>
 
 #ifdef SugarPPNamespace
 namespace SugarPP
@@ -247,12 +248,30 @@ namespace SugarPP
     template<typename Type>
     struct is_actually
     {
-        using type = std::remove_reference_t<Type>;
+        using type = std::add_const_t<std::remove_reference_t<Type>>;
 
-        template<typename Arg>
-        bool operator()(Arg&& arg) const
+        template<typename Arg/*, typename = std::enable_if_t<!std::is_pointer_v<std::remove_reference_t<Arg>>>*/>  //for reference
+        bool operator()(Arg const& arg) const
         {
-            return (dynamic_cast<Type*>(&arg) != nullptr);
+            return (dynamic_cast<type*>(&arg) != nullptr);
+        }
+
+        template<typename Pointer, typename = std::enable_if_t<std::is_pointer_v<std::remove_reference_t<Pointer>>>>  //for raw pointer
+        bool operator()(Pointer const& arg) const
+        {
+            return (dynamic_cast<type*>(arg) != nullptr);
+        }
+
+        template<typename UniquePtrType>    //for std::unique_ptr
+        bool operator()(std::unique_ptr<UniquePtrType> const& ptr) const
+        {
+            return (*this)(ptr.get());
+        }
+
+        template<typename SharedPtrType>
+        bool operator()(std::shared_ptr<SharedPtrType> const& ptr) const
+        {
+            return (*this)(ptr.get());
         }
     };
 

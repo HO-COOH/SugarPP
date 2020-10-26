@@ -130,6 +130,21 @@ auto describe = [](auto&& obj) {
 };
 ```
 
+- Polymorphic type matching:
+```cpp
+/*SugarPP*/
+struct Shape { virtual ~Shape() = default; };
+struct Circle :Shape {};
+struct Square :Shape{};
+
+std::unique_ptr<Shape> pt{ new Circle{} };
+when(*pt,
+    is_actually<Circle>(), [] { print("Circle* pt"); },
+    is_actually<Square>(), [] { print("Square* pt"); },
+    Else(),                [] { print("Unknown type"); }
+)();    //"Circle* pt"
+```
+
 - Range matching:
 ```kotlin
 /*kotlin*/
