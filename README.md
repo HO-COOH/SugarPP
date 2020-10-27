@@ -27,7 +27,7 @@ SugarPP is a collection of syntactic sugar for C++ code.
 ## How to Use
 1. SugarPP is **header only** and **each header file is independent**. Just clone this repository and go to [./include/sugarpp](./include/sugarpp) or copy the corresponding header file you want to use.
 
-    Or, for a hassle free installation, copy this Cmake snippet to your root ``CMakeLists.txt`` to automatically download & use this library in your project. No need to clone the project manually!
+    Or, if you want to use it hassle free, copy this Cmake snippet to your root ``CMakeLists.txt`` to automatically download & use this library in your project. No need to clone the project manually!
     ```cmake
     include(FetchContent)
     FetchContent_Declare(
@@ -42,7 +42,7 @@ SugarPP is a collection of syntactic sugar for C++ code.
     target_link_libraries(<Your target> PRIVATE SugarPP)
     ```
 
-    Want to use the library globally? Copy this Cmake snippet to your roor ``CMakeLists.txt``, to automatically download & use this library in your project. No need to clone the project!
+    Or, if you want to use the library globally, copy this Cmake snippet to your roor ``CMakeLists.txt`` to automatically download & use this library in your project. No need to clone the project!
     ```cmake
     include(FetchContent)
     FetchContent_Declare(
@@ -172,7 +172,7 @@ when(
     Else(),     []{ print("x+y is even");}
 )();//"x is odd"
 ```
-Note: Unlike C/C++ switch-case, ``kotlin`` ``when`` is short-circuiting; the logic terminates at the first satisfied branch. ``SugarPP`` ``when`` has the same behavior.
+Note: Unlike C/C++ switch-case, ``kotlin`` ``when`` is short-circuiting; the execution terminates at the first satisfied branch. ``SugarPP`` ``when`` has the same behavior.
 
 - Pattern matching
 
