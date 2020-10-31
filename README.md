@@ -19,7 +19,7 @@ SugarPP is a collection of syntactic sugar for C++ code.
       - [Features](#features-2)
       - [Usage](#usage-2)
       - [Documentation](#documentation-2)
-    - [Types conversion](#types-conversion)
+    - [Type conversion](#type-conversion)
       - [Features](#features-3)
       - [Usage](#usage-3)
   - [Motivation](#motivation)
@@ -66,10 +66,10 @@ Alternatively, see [generated doxygen document here.](https://ho-cooh.github.io/
 ## Requirements
 SugarPP uses various C++17 language features; thus, it requires a C++17 compatible compiler to use.
 
-**GCC 10.1 and older has [a known bug](https://stackoverflow.com/questions/64158484/ambiguous-call-after-adding-a-template-parameter-that-has-a-default-type), which causes issues on the overload resolution of ``detail::when_impl``; consider upgrading to GCC 10.2 or newer**
+~~**GCC 10.1 and older has [a known bug](https://stackoverflow.com/questions/64158484/ambiguous-call-after-adding-a-template-parameter-that-has-a-default-type), which causes issues on the overload resolution of ``detail::when_impl``; consider upgrading to GCC 10.2 or newer**~~ Nope, it is compatible with GCC 9.2 now :)
 
 Tested with:
-- GCC 10.2
+- GCC 10.2 & GCC 9.2
 - Clang 10.0
 - Visual Studio 16.7
 
