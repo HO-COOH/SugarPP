@@ -7,6 +7,7 @@
 
 using namespace SugarPP;
 using namespace std::literals;
+
 int main()
 {
     /*Value matching*/

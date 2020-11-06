@@ -439,7 +439,7 @@ namespace SugarPP
             if constexpr (I + 2 >= std::tuple_size_v<tuple_type> -1)
                 return !current;
             else //forget this you get 3K errors
-                return !(current && shouldConvert<I + 2, Tuple>());
+                return (!current || shouldConvert<I + 2, Tuple>());
         }
     }
 
