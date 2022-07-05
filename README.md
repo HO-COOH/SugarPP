@@ -22,6 +22,8 @@ SugarPP is a collection of syntactic sugar for C++ code.
     - [Type conversion](#type-conversion)
       - [Features](#features-3)
       - [Usage](#usage-3)
+    - [Lazy](#lazy)
+      - [Features](#features-4)
   - [Motivation](#motivation)
 
 ## How to Use
