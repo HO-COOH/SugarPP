@@ -419,6 +419,35 @@ Just copy [./include/sugarpp/types/types.hpp](./include/sugarpp/types/types.hpp)
 
 More example in [./test/source/types/to_string.cpp](./test/source/types/to_string.cpp)
 
+
+-----
+### Lazy
+
+#### Features
+A C++ implementation for [Kotlin](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-lazy/)'s `Lazy`, which represents a value with lazy initialization, 
+with type inference from the initializer and multi-threading synchronization support.
+
+```cpp
+Lazy lazyInt{ [] { return 1; } }; //Lazy<Int>
+Lazy lazyDouble
+{
+	[] {
+        /*Some computation*/
+		return 2.0;
+	},
+	ThreadSafetyMode::Synchronized
+};
+```
+Possible thread-safety modes are also equivalent to [Kotlin](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-lazy-thread-safety-mode/)
+```cpp
+enum class ThreadSafetyMode
+{
+	Synchronized,
+	Publication,
+	None
+};
+```
+
 -----
 ## Motivation
 I had so much fun writing these and learned so much. ~~Such a great language that gives you nightmare everytime you want to add stuff. C++ itself is difficult enough, yet you realize that you can't even have a compiler to trust with when 3 different compilers (Visual studio, Clang, GCC) gives you different results.~~
